@@ -33,8 +33,8 @@ export async function POST(req: Request) {
       .toLowerCase();
 
     const lastName = names[names.length - 1].toLowerCase();
-    // const password = Math.random().toString(36).slice(-8)
-    const password = "12345678";
+    const password = Math.random().toString(36).slice(-8);
+    // const password = "12345678";
     const username = initials + lastName;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -47,7 +47,6 @@ export async function POST(req: Request) {
         name,
         username,
         password: hashedPassword,
-        expiresAt,
       },
     });
 
