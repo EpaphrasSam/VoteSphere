@@ -28,14 +28,34 @@ export const authOptions: any = {
           throw new Error("Invalid username or password");
         }
 
-        return { id: user.id, username: user.username };
+        return user;
       },
     }),
   ],
+  callbacks: {
+    jwt: async ({ token, user }: any) => {
+      if (user) {
+        token.user_id = user.id;
+        token.username = user.username;
+      }
+      return Promise.resolve(token);
+    },
+    session: async ({ session, token }: any) => {
+      if (token) {
+        session.user.id = token.user_id;
+        session.user.username = token.username;
+      }
+      return Promise.resolve(session);
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60,
+  },
+  pages: {
+    signIn: "/sign-in",
+    error: "/sign-in",
   },
 };
 

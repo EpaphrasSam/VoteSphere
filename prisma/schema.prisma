@@ -9,11 +9,59 @@ datasource db {
 }
 
 model User {
-  id          String @id @default(cuid()) @map("_id")
+  id          String      @id @default(cuid()) @map("_id")
   name        String
   username    String
   password    String
-  expiresAt   DateTime
+  votedPeriods UserVotedPeriod[]
 }
 
+model VotingPeriod {
+  id        String       @id @default(cuid()) @map("_id")
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  positions Position[]
+  candidates Candidate[]
+  votes      Vote[]
+  userVoted UserVotedPeriod[]
+}
 
+model Position {
+  id            String @id @default(cuid()) @map("_id")
+  name          String
+  votingPeriod  VotingPeriod @relation(fields: [votingPeriodId], references: [id])
+  votingPeriodId String
+  candidates    Candidate[]
+  votes         Vote[]
+}
+
+model Candidate {
+  id            String @id @default(cuid()) @map("_id")
+  name          String
+  image         String?
+  position      Position    @relation(fields: [positionId], references: [id])
+  positionId    String
+  votingPeriod  VotingPeriod @relation(fields: [votingPeriodId], references: [id])
+  votingPeriodId String
+  votes         Vote[]
+}
+
+model Vote {
+  id            String @id @default(cuid()) @map("_id")
+  candidate     Candidate   @relation(fields: [candidateId], references: [id])
+  candidateId   String
+  votingPeriod  VotingPeriod @relation(fields: [votingPeriodId], references: [id])
+  votingPeriodId String
+  position      Position    @relation(fields: [positionId], references: [id])
+  positionId    String
+  isYes         String?  
+}
+
+model UserVotedPeriod {
+  id            String @id @default(cuid()) @map("_id")
+  user          User @relation(fields: [userId], references: [id])
+  userId        String
+  votingPeriod  VotingPeriod @relation(fields: [votingPeriodId], references: [id])
+  votingPeriodId String
+}
