@@ -14,9 +14,9 @@ import React, { useEffect } from "react";
 const InstructionsModal = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // useEffect(() => {
-  //   onOpen();
-  // }, []);
+  useEffect(() => {
+    onOpen();
+  }, []);
   return (
     <Modal
       backdrop="blur"
@@ -52,7 +52,7 @@ const InstructionsModal = () => {
           <p>Welcome to the KSB voting system!</p>
           <p>
             In this voting system, you will be able to cast your votes for
-            various positions within our faculty.
+            various positions within KSB Welfare.
           </p>
           <p>
             Please review the candidates carefully before making your choices.

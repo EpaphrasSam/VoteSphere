@@ -61,46 +61,55 @@ const VotingSummaryModal = ({
         <ModalHeader className="flex flex-col gap-1 items-center justify-center">
           Voting Summary
         </ModalHeader>
-        <ModalBody className="items-center justify-center h-full">
+        <ModalBody className="flex flex-col items-center justify-center h-full">
           {position.map((pos, positionIndex) => (
-            <div key={positionIndex}>
+            <div key={positionIndex} className="flex flex-col items-center">
               <h1 className="font-bold text-center text-lg">{pos.name}</h1>
               {selectedCandidates[positionIndex] !== undefined && (
-                <div>
+                <div className="flex flex-col items-center">
                   {typeof selectedCandidates[positionIndex] === "number" && (
                     <>
-                      <Image
-                        src={
-                          pos.candidates[selectedCandidates[positionIndex]]
-                            .image || Profile
-                        }
-                        alt={
-                          pos.candidates[selectedCandidates[positionIndex]].name
-                        }
-                        width={100}
-                        height={100}
-                        className="rounded-full"
-                      />
-                      <span>
-                        {pos.candidates[selectedCandidates[positionIndex]].name}
-                      </span>
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src={
+                            pos.candidates[selectedCandidates[positionIndex]]
+                              .image || Profile
+                          }
+                          alt={
+                            pos.candidates[selectedCandidates[positionIndex]]
+                              .name
+                          }
+                          width={100}
+                          height={100}
+                          className="rounded-full"
+                        />
+                        <span>
+                          {
+                            pos.candidates[selectedCandidates[positionIndex]]
+                              .name
+                          }
+                        </span>
+                      </div>
                     </>
                   )}
                   {pos.candidates.length === 1 &&
                     (selectedCandidates[positionIndex] === "yes" ||
                       selectedCandidates[positionIndex] === "no") && (
                       <>
-                        <Image
-                          src={pos.candidates[0].image}
-                          alt={pos.candidates[0].name}
-                          width={100}
-                          height={100}
-                        />
-                        <span>{pos.candidates[0].name}</span>
-                        <span>
-                          {" "}
-                          - {selectedCandidates[positionIndex].toUpperCase()}
-                        </span>
+                        <div className="flex flex-col items-center">
+                          <Image
+                            src={pos.candidates[0].image}
+                            alt={pos.candidates[0].name}
+                            width={100}
+                            height={100}
+                            className="rounded-full"
+                          />
+                          <span>{pos.candidates[0].name}</span>
+                          <span>
+                            {" "}
+                            - {selectedCandidates[positionIndex].toUpperCase()}
+                          </span>
+                        </div>
                       </>
                     )}
                 </div>
@@ -108,6 +117,7 @@ const VotingSummaryModal = ({
             </div>
           ))}
         </ModalBody>
+
         <ModalFooter>
           <Button color="danger" onClick={onClose}>
             Cancel
