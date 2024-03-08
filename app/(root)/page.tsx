@@ -47,6 +47,7 @@ export default async function Home() {
         votingPeriods={votingPeriods}
         id={user?.id}
         disabled={hasUserVoted || isTimeToVote() !== "Time to vote"}
+        // disabled={false}
       />
     </>
   );

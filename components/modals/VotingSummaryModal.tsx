@@ -7,10 +7,10 @@ import {
   ModalFooter,
   Button,
   ModalBody,
-  useDisclosure,
 } from "@nextui-org/react";
 import Image from "next/image";
 import React from "react";
+import Profile from "@/public/profile.png";
 
 type ConfirmationModalProps = {
   isOpen: boolean;
@@ -72,13 +72,14 @@ const VotingSummaryModal = ({
                       <Image
                         src={
                           pos.candidates[selectedCandidates[positionIndex]]
-                            .image
+                            .image || Profile
                         }
                         alt={
                           pos.candidates[selectedCandidates[positionIndex]].name
                         }
                         width={100}
                         height={100}
+                        className="rounded-full"
                       />
                       <span>
                         {pos.candidates[selectedCandidates[positionIndex]].name}

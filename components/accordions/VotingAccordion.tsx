@@ -7,6 +7,7 @@ import { Checkbox } from "@nextui-org/react";
 import VotingSummaryModal from "../modals/VotingSummaryModal";
 import toast, { Toaster } from "react-hot-toast";
 import { takeVote } from "@/utils/actions/votes.action";
+import Profile from "@/public/profile.png";
 
 type Candidate = {
   name: string;
@@ -105,9 +106,9 @@ const VotingAccordion = ({ votingPeriods, id, disabled }: any) => {
     }
   };
 
-  if (!votingPeriods || votingPeriods.length === 0) {
+  if (!votingPeriods || votingPeriods.length === 0 || votingPeriods.message) {
     return (
-      <div className="flex justify-center items-center text-3xl font-bold">
+      <div className="flex text-center pt-10 justify-center items-center text-3xl font-bold">
         No voting periods available
       </div>
     );
@@ -137,7 +138,15 @@ const VotingAccordion = ({ votingPeriods, id, disabled }: any) => {
       </div>
 
       {votingPeriods.positions && votingPeriods.positions.length > 0 ? (
-        <Accordion isDisabled={disabled} variant="splitted" className="my-4">
+        <Accordion
+          selectionMode="multiple"
+          defaultExpandedKeys={votingPeriods.positions.map((_: any, i: any) =>
+            i.toString()
+          )}
+          isDisabled={disabled}
+          variant="splitted"
+          className="my-4"
+        >
           {votingPeriods.positions.map(
             (position: Position, positionIndex: number) => (
               <AccordionItem
@@ -155,10 +164,10 @@ const VotingAccordion = ({ votingPeriods, id, disabled }: any) => {
                         }`}
                       >
                         <Image
-                          src={candidate.image}
+                          src={candidate.image || Profile}
                           alt={candidate.name}
-                          width={100}
-                          height={100}
+                          width={400}
+                          height={400}
                           className="rounded-full"
                         />
                         <div className="py-2 text-center">{candidate.name}</div>

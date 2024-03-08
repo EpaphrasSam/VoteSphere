@@ -16,6 +16,10 @@ export async function getVotingPeriods() {
       },
     });
 
+    if (!firstVotingPeriod) {
+      return [];
+    }
+
     const formattedVotingPeriod = {
       id: firstVotingPeriod.id,
       name: firstVotingPeriod.name,
