@@ -103,3 +103,68 @@ export async function getVotedPeriodByUser(
     return { message: "Error while fetching voted periods" };
   }
 }
+
+export async function generateVoteReport(votingPeriodId: string) {
+  try {
+    const votingPeriod = await prisma.votingPeriod.findFirst({
+      where: {
+        id: votingPeriodId,
+      },
+      include: {
+        positions: {
+          include: {
+            candidates: true,
+          },
+        },
+        votes: true,
+      },
+    });
+    if (!votingPeriod) {
+      return { message: "Voting period not found" };
+    }
+    const voteReport = {
+      id: votingPeriod.id,
+      name: votingPeriod.name,
+      startTime: votingPeriod.startDate,
+      endTime: votingPeriod.endDate,
+      positions: votingPeriod.positions.map((position) => {
+        return {
+          id: position.id,
+          name: position.name,
+          candidates:
+            position.candidates.length > 1
+              ? position.candidates.map((candidate) => {
+                  const votes = votingPeriod.votes.filter((vote) => {
+                    return (
+                      vote.candidateId === candidate.id &&
+                      vote.votingPeriodId === votingPeriod.id
+                    );
+                  });
+                  return {
+                    id: candidate.id,
+                    name: candidate.name,
+                    votes: votes.length,
+                  };
+                })
+              : position.candidates.map((candidate) => {
+                  const votes = votingPeriod.votes.filter((vote) => {
+                    return (
+                      vote.candidateId === candidate.id &&
+                      vote.votingPeriodId === votingPeriod.id
+                    );
+                  });
+                  return {
+                    id: candidate.id,
+                    name: candidate.name,
+                    yes: votes.filter((vote) => vote.isYes === "yes").length,
+                    no: votes.filter((vote) => vote.isYes === "no").length,
+                  };
+                }),
+        };
+      }),
+    };
+    return voteReport;
+  } catch (error) {
+    return { message: "Error while generating vote report" };
+  }
+}

@@ -5,7 +5,7 @@ import {
   getVotingPeriods,
 } from "@/utils/actions/votes.action";
 import { authOptions } from "@/utils/auth";
-import { Chip } from "@nextui-org/react";
+import { Button, Chip } from "@nextui-org/react";
 import { getServerSession } from "next-auth";
 import { IoIosWarning } from "react-icons/io";
 
@@ -27,7 +27,6 @@ export default async function Home() {
   return (
     <>
       <InstructionsModal />
-
       {hasUserVoted ? (
         <div className="flex flex-row items-center justify-center py-4">
           <Chip color="danger" startContent={<IoIosWarning />}>
@@ -43,9 +42,11 @@ export default async function Home() {
           </div>
         )
       )}
+
       <VotingAccordion
         votingPeriods={votingPeriods}
         id={user?.id}
+        username={user?.username}
         disabled={hasUserVoted || isTimeToVote() !== "Time to vote"}
         // disabled={false}
       />

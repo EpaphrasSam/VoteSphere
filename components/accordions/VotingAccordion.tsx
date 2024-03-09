@@ -6,8 +6,10 @@ import Image from "next/image";
 import { Checkbox } from "@nextui-org/react";
 import VotingSummaryModal from "../modals/VotingSummaryModal";
 import toast, { Toaster } from "react-hot-toast";
-import { takeVote } from "@/utils/actions/votes.action";
+import { generateVoteReport, takeVote } from "@/utils/actions/votes.action";
 import Profile from "@/public/profile.png";
+import { PiMicrosoftExcelLogo } from "react-icons/pi";
+import { utils, writeFile } from "xlsx";
 
 type Candidate = {
   name: string;
@@ -30,7 +32,7 @@ interface VotingAccordionProps {
   votingPeriods: VotingPeriodData[];
 }
 
-const VotingAccordion = ({ votingPeriods, id, disabled }: any) => {
+const VotingAccordion = ({ votingPeriods, id, disabled, username }: any) => {
   const [selectedCandidates, setSelectedCandidates] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -106,6 +108,85 @@ const VotingAccordion = ({ votingPeriods, id, disabled }: any) => {
     }
   };
 
+  const generateVoteReports = async () => {
+    try {
+      const response: any = await generateVoteReport(votingPeriods?.id);
+      if (!response.message) {
+        const workbook = utils.book_new();
+        const worksheet = utils.aoa_to_sheet([]);
+
+        const date = new Date(response.startTime).toLocaleDateString();
+        const startTime = new Date(votingPeriods.startTime).toLocaleTimeString(
+          [],
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+          }
+        );
+
+        const endTime = new Date(votingPeriods.endTime).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        worksheet["C1"] = {
+          v: "VOTING REPORT",
+        };
+        worksheet["C2"] = { v: response.name };
+        worksheet["B3"] = { v: date + " " + startTime + " - " + endTime };
+
+        const tableColumns = [
+          "Position",
+          "Name",
+          "Votes (Yes)",
+          "Votes (No)",
+          "Percentage",
+        ];
+        const excelRows = [tableColumns];
+
+        response.positions.forEach((position: any) => {
+          position.candidates.forEach((candidate: any) => {
+            const totalVotes = (candidate.yes || 0) + (candidate.no || 0);
+            const totalPercentage =
+              totalVotes === 0 ? 0 : ((candidate.yes || 0) / totalVotes) * 100;
+
+            const row = [
+              position.name,
+              candidate.name,
+              candidate.yes || 0,
+              candidate.no || 0,
+              `${totalPercentage.toFixed(2)}%`,
+            ];
+            excelRows.push(row);
+          });
+        });
+
+        utils.sheet_add_json(worksheet, excelRows, {
+          origin: "A5",
+          skipHeader: true,
+        });
+
+        const maxLengths = tableColumns.map((column: any) => {
+          return Math.max(
+            ...excelRows.map((row: any) => row[column]?.toString().length || 0),
+            column.length
+          );
+        });
+
+        worksheet["!cols"] = maxLengths.map((maxLen: any) => ({
+          wch: maxLen + 2,
+        }));
+
+        utils.book_append_sheet(workbook, worksheet, "Voting Report");
+        writeFile(workbook, "Voting Report.xlsx");
+      } else {
+        toast.error(response.message || "Error while generating report");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   if (!votingPeriods || votingPeriods.length === 0 || votingPeriods.message) {
     return (
       <div className="flex text-center pt-10 justify-center items-center text-3xl font-bold">
@@ -116,6 +197,17 @@ const VotingAccordion = ({ votingPeriods, id, disabled }: any) => {
 
   return (
     <div className="p-6">
+      {username === "iensam" && (
+        <div className="flex items-end justify-end">
+          <Button
+            startContent={<PiMicrosoftExcelLogo size={20} />}
+            color="success"
+            onClick={generateVoteReports}
+          >
+            Generate Report
+          </Button>
+        </div>
+      )}
       <Toaster position="top-center" />
       <div className="font-bold uppercase text-3xl text-center py-4">
         {votingPeriods.name}
