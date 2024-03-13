@@ -36,6 +36,7 @@ export const authOptions: any = {
     jwt: async ({ token, user }: any) => {
       if (user) {
         token.user_id = user.id;
+        token.role = user.role;
         token.username = user.username;
       }
       return Promise.resolve(token);
@@ -43,6 +44,7 @@ export const authOptions: any = {
     session: async ({ session, token }: any) => {
       if (token) {
         session.user.id = token.user_id;
+        session.user.role = token.role;
         session.user.username = token.username;
       }
       return Promise.resolve(session);

@@ -9,12 +9,18 @@ import {
   Image,
   Button,
 } from "@nextui-org/react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { IoIosLogOut } from "react-icons/io";
+import { FiUser } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const { data: session } = useSession();
+
+  const navigate = useRouter();
   return (
     <Navbar maxWidth="full" shouldHideOnScroll isBordered>
-      <NavbarBrand className="flex items-center gap-2 max-w-full">
+      <div className="flex items-center gap-2 max-w-full">
         <Link href="/">
           <Image
             src="/ksb.jpg"
@@ -23,13 +29,29 @@ const Header = () => {
             height={40}
             className="rounded-full"
           />
-          <p className="font-bold text-inherit ml-1">KSB Voting System</p>
+          <p className="font-bold text-inherit ml-1">Voting System</p>
         </Link>
-      </NavbarBrand>
+      </div>
 
       <NavbarContent as="div" justify="end">
-        <Button onClick={() => signOut()} color="danger">
-          Logout
+        {/* @ts-ignore */}
+        {session && session?.user?.role === "admin" && (
+          <Button
+            size="sm"
+            startContent={<FiUser size={20} />}
+            color="primary"
+            onClick={() => navigate.push("/admin")}
+          >
+            <span className="max-sm:hidden text-sm">Admin</span>
+          </Button>
+        )}
+        <Button
+          size="sm"
+          startContent={<IoIosLogOut size={20} />}
+          onClick={() => signOut()}
+          color="danger"
+        >
+          <span className="max-sm:hidden text-sm">Logout</span>
         </Button>
       </NavbarContent>
     </Navbar>

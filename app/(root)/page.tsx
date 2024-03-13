@@ -13,9 +13,9 @@ export default async function Home() {
   const votingPeriods: any = await getVotingPeriods();
   const { user }: any = await getServerSession(authOptions);
   const hasUserVoted = await getVotedPeriodByUser(user?.id, votingPeriods?.id);
+  const currentDate = new Date();
 
   const isTimeToVote = () => {
-    const currentDate = new Date();
     const startDate = new Date(votingPeriods?.startTime);
     const endDate = new Date(votingPeriods?.endTime);
 

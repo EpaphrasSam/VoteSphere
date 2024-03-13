@@ -13,6 +13,7 @@ model User {
   name        String
   username    String
   password    String
+  role        String? 
   votedPeriods UserVotedPeriod[]
 }
 
@@ -21,6 +22,7 @@ model VotingPeriod {
   name      String
   startDate DateTime
   endDate   DateTime
+  current   Boolean @default(false)
   positions Position[]
   candidates Candidate[]
   votes      Vote[]

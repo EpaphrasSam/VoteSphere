@@ -34,10 +34,13 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const error = useSearchParams().get("error");
   const router = useRouter();
+  const toastId = React.useRef<string | null>(null);
 
   useEffect(() => {
-    if (error) {
-      toast.error(error);
+    if (error && !toastId.current) {
+      toastId.current = toast.error(error, {
+        duration: 3000,
+      });
       router.replace("/sign-in");
     }
   }, []);
@@ -65,11 +68,7 @@ const LoginForm = () => {
   };
 
   return (
-    <Card
-      isBlurred
-      className="flex flex-col items-center justify-center p-10 mt-10"
-    >
-      <Toaster position="top-center" />
+    <Card isBlurred className="flex flex-col items-center justify-center p-10">
       <CardHeader className="items-center justify-center text-3xl font-bold">
         Login
       </CardHeader>

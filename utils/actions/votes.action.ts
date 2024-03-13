@@ -6,7 +6,9 @@ import { revalidatePath } from "next/cache";
 export async function getVotingPeriods() {
   try {
     const [firstVotingPeriod] = await prisma.votingPeriod.findMany({
-      take: 1,
+      where: {
+        current: true,
+      },
       include: {
         positions: {
           include: {
