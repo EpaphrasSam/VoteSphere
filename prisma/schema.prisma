@@ -14,6 +14,7 @@ model User {
   username    String
   password    String
   role        String? 
+  deleted     Boolean @default(false)
   votedPeriods UserVotedPeriod[]
 }
 
@@ -23,6 +24,7 @@ model VotingPeriod {
   startDate DateTime
   endDate   DateTime
   current   Boolean @default(false)
+  deleted   Boolean @default(false)
   positions Position[]
   candidates Candidate[]
   votes      Vote[]
@@ -34,6 +36,7 @@ model Position {
   name          String
   votingPeriod  VotingPeriod @relation(fields: [votingPeriodId], references: [id])
   votingPeriodId String
+  deleted       Boolean @default(false)
   candidates    Candidate[]
   votes         Vote[]
 }
@@ -44,6 +47,7 @@ model Candidate {
   image         String?
   position      Position    @relation(fields: [positionId], references: [id])
   positionId    String
+  deleted       Boolean @default(false)
   votingPeriod  VotingPeriod @relation(fields: [votingPeriodId], references: [id])
   votingPeriodId String
   votes         Vote[]

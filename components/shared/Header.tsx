@@ -1,22 +1,13 @@
 "use client";
 
 import React from "react";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  Link,
-  Image,
-  Button,
-} from "@nextui-org/react";
-import { signOut, useSession } from "next-auth/react";
+import { Navbar, NavbarContent, Link, Image, Button } from "@nextui-org/react";
+import { signOut } from "next-auth/react";
 import { IoIosLogOut } from "react-icons/io";
 import { FiUser } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 
-const Header = () => {
-  const { data: session } = useSession();
-
+const Header = ({ role }: any) => {
   const navigate = useRouter();
   return (
     <Navbar maxWidth="full" shouldHideOnScroll isBordered>
@@ -35,7 +26,7 @@ const Header = () => {
 
       <NavbarContent as="div" justify="end">
         {/* @ts-ignore */}
-        {session && session?.user?.role === "admin" && (
+        {role && role === "admin" && (
           <Button
             size="sm"
             startContent={<FiUser size={20} />}

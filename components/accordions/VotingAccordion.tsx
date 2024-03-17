@@ -171,14 +171,12 @@ const VotingAccordion = ({ votingPeriods, id, disabled, username }: any) => {
                 aria-label={`Accordion ${positionIndex + 1}`}
                 title={position.name}
               >
-                <div className="flex justify-center">
+                <div className="flex flex-row items-center justify-evenly flex-wrap pt-4">
                   {position.candidates.map(
                     (candidate: Candidate, candidateIndex: number) => (
                       <div
                         key={candidateIndex}
-                        className={`flex flex-col items-center justify-center p-2 ${
-                          position.candidates.length === 1 ? "w-1/3" : "w-full"
-                        }`}
+                        className={`flex flex-col items-center justify-center p-2 `}
                       >
                         <Image
                           src={candidate.image || Profile}

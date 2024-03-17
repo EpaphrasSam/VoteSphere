@@ -12,11 +12,16 @@ import {
   Pagination,
   Button,
   Tooltip,
+  Selection,
 } from "@nextui-org/react";
 import { PiMicrosoftExcelLogo } from "react-icons/pi";
 import { generateVoteReport } from "@/utils/actions/votes.action";
 import { utils, writeFile } from "xlsx";
-import { FiEdit3 } from "react-icons/fi";
+import { FiEdit3, FiPlus } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { selectVotingPeriod } from "@/utils/actions/admin.action";
+import CustomConfirmationModal from "../modals/CustomConfirmationModal";
+import { FaCheck } from "react-icons/fa";
 
 type votingPeriods = {
   id: string;
@@ -35,10 +40,11 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
   const rowsPerPage = 10;
   const [page, setPage] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [filteredVotingPeriods, setFilteredVotingPeriods] = useState<
-    votingPeriods[]
-  >([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [id, setId] = useState<string | null>(null);
   const toastId = useRef<string | null>(null);
+  const navigate = useRouter();
 
   useEffect(() => {
     if (message !== "" && !toastId.current) {
@@ -48,12 +54,6 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
     }
   }, [message]);
 
-  useEffect(() => {
-    if (votingPeriods.length > 0) {
-      setFilteredVotingPeriods(votingPeriods);
-    }
-  }, [votingPeriods]);
-
   const selectedVotingPeriodId = useMemo(() => {
     const currentPeriod = votingPeriods.find(
       (period) => period.current === true
@@ -61,14 +61,14 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
     return currentPeriod ? currentPeriod.id : "";
   }, [votingPeriods]);
 
-  const pages = Math.ceil(filteredVotingPeriods?.length / rowsPerPage);
+  const pages = Math.ceil(votingPeriods?.length / rowsPerPage);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return filteredVotingPeriods?.slice(start, end);
-  }, [page, filteredVotingPeriods]);
+    return votingPeriods?.slice(start, end);
+  }, [page, votingPeriods]);
 
   const generateVoteReports = async () => {
     try {
@@ -162,14 +162,42 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
     }
   };
 
-  const isEmpty = filteredVotingPeriods.length === 0;
+  const isEmpty = votingPeriods.length === 0;
+
+  const onConfirm = async () => {
+    if (id) {
+      try {
+        setIsSubmitting(true);
+        const response = await selectVotingPeriod(id);
+        if (response.message === "Voting period selected successfully") {
+          toast.success(response.message);
+        } else {
+          toast.error(response.message);
+        }
+      } catch (error) {
+        toast.error("Error while selecting voting period");
+      } finally {
+        setIsSubmitting(false);
+        setModalOpen(false);
+      }
+    }
+  };
 
   return (
     <>
-      <div className="flex items-end justify-end mb-6">
+      <div className="flex justify-between mb-6">
+        <Button
+          startContent={<FiPlus size={20} className="max-[400px]:hidden" />}
+          color="primary"
+          onClick={() => navigate.push("/admin/voting-periods")}
+        >
+          Create New Vote
+        </Button>
         <Button
           isLoading={isDownloading}
-          startContent={<PiMicrosoftExcelLogo size={20} />}
+          startContent={
+            <PiMicrosoftExcelLogo size={20} className="max-[400px]:hidden" />
+          }
           color="success"
           onClick={generateVoteReports}
         >
@@ -179,6 +207,13 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
       <Table
         aria-label="Voting Period Table"
         selectedKeys={[selectedVotingPeriodId]}
+        // onSelectionChange={(key: any) => {
+        //   const currentKey = key.currentKey;
+        //   if (currentKey !== undefined) {
+        //     setId(currentKey);
+        //     setModalOpen(true);
+        //   }
+        // }}
         color="default"
         selectionMode="single"
         bottomContent={
@@ -239,18 +274,42 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
                     .toLowerCase()}
                 </TableCell>
                 <TableCell>
-                  {/* <Tooltip content="Edit"> */}
-                  <FiEdit3
-                    size={20}
-                    className="hover:opacity-50 cursor-pointer"
-                  />
-                  {/* </Tooltip> */}
+                  <div className="flex gap-4">
+                    <FiEdit3
+                      size={20}
+                      className="hover:opacity-50 cursor-pointer"
+                      onClick={() =>
+                        navigate.push(
+                          `/admin/voting-periods?votingPeriodId=${item.id}`
+                        )
+                      }
+                    />
+                    <FaCheck
+                      size={16}
+                      className="hover:opacity-50 cursor-pointer"
+                      onClick={() => {
+                        setId(item.id);
+                        if (item.id !== selectedVotingPeriodId) {
+                          setModalOpen(true);
+                        }
+                      }}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         )}
       </Table>
+      {modalOpen && (
+        <CustomConfirmationModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          message="Are you sure you want to select this voting?"
+          onConfirm={onConfirm}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </>
   );
 };

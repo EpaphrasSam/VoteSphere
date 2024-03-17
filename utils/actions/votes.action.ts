@@ -5,14 +5,22 @@ import { revalidatePath } from "next/cache";
 
 export async function getVotingPeriods() {
   try {
-    const [firstVotingPeriod] = await prisma.votingPeriod.findMany({
+    const firstVotingPeriod = await prisma.votingPeriod.findFirst({
       where: {
         current: true,
+        deleted: false,
       },
       include: {
         positions: {
+          where: {
+            deleted: false,
+          },
           include: {
-            candidates: true,
+            candidates: {
+              where: {
+                deleted: false,
+              },
+            },
           },
         },
       },
