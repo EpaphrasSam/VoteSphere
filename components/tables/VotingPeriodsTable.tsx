@@ -21,7 +21,7 @@ import { FiEdit3, FiPlus } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { selectVotingPeriod } from "@/utils/actions/admin.action";
 import CustomConfirmationModal from "../modals/CustomConfirmationModal";
-import { FaCheck } from "react-icons/fa";
+import { TfiCheckBox } from "react-icons/tfi";
 
 type votingPeriods = {
   id: string;
@@ -102,32 +102,45 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
           .replace(/ /g, "")
           .toLowerCase();
 
-        worksheet["C1"] = {
+        worksheet["B1"] = {
           v: "VOTING REPORT",
         };
-        worksheet["C2"] = { v: response.name };
+        worksheet["B2"] = { v: response.name };
         worksheet["B3"] = { v: date + ", " + startTime + " - " + endTime };
 
-        const tableColumns = [
-          "Position",
-          "Name",
-          "Votes (Yes)",
-          "Votes (No)",
-          "Percentage",
-        ];
+        const tableColumns = ["Position", "Name", "Votes", "Percentage"];
         const excelRows = [tableColumns];
 
         response.positions.forEach((position: any) => {
           position.candidates.forEach((candidate: any) => {
-            const totalVotes = (candidate.yes || 0) + (candidate.no || 0);
-            const totalPercentage =
-              totalVotes === 0 ? 0 : ((candidate.yes || 0) / totalVotes) * 100;
+            let totalVotes;
+            let totalPercentage;
+
+            if (typeof candidate.votes !== "undefined") {
+              totalVotes = candidate.votes;
+
+              const sumOfAllCandidatesVotes = position.candidates.reduce(
+                (acc: any, currCandidate: any) => {
+                  return acc + (currCandidate.votes || 0);
+                },
+                0
+              );
+
+              totalPercentage = (totalVotes / sumOfAllCandidatesVotes) * 100;
+            } else {
+              totalVotes = (candidate.yes || 0) + (candidate.no || 0);
+              totalPercentage =
+                totalVotes === 0
+                  ? 0
+                  : ((candidate.yes || 0) / totalVotes) * 100;
+            }
 
             const row = [
               position.name,
               candidate.name,
-              candidate.yes || 0,
-              candidate.no || 0,
+              typeof candidate.votes !== "undefined"
+                ? candidate.votes
+                : `YES- ${candidate.yes || 0}   NO- ${candidate.no || 0}`,
               `${totalPercentage.toFixed(2)}%`,
             ];
             excelRows.push(row);
@@ -139,19 +152,25 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
           skipHeader: true,
         });
 
-        const maxLengths = tableColumns.map((column: any) => {
+        const headerRow = excelRows[0];
+
+        const maxLengths = headerRow.map((_, colIndex) => {
           return Math.max(
-            ...excelRows.map((row: any) => row[column]?.toString().length || 0),
-            column.length
+            ...excelRows.map((row) => {
+              const cellValue = row[colIndex];
+              return cellValue !== null && cellValue !== undefined
+                ? cellValue.toString().length
+                : 0;
+            })
           );
         });
 
-        worksheet["!cols"] = maxLengths.map((maxLen: any) => ({
+        worksheet["!cols"] = maxLengths.map((maxLen) => ({
           wch: maxLen + 2,
         }));
 
         utils.book_append_sheet(workbook, worksheet, "Voting Report");
-        writeFile(workbook, "Voting Report.xlsx");
+        writeFile(workbook, `${response.name} Report.xlsx`);
       } else {
         toast.error(response.message || "Error while generating report");
       }
@@ -207,13 +226,6 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
       <Table
         aria-label="Voting Period Table"
         selectedKeys={[selectedVotingPeriodId]}
-        // onSelectionChange={(key: any) => {
-        //   const currentKey = key.currentKey;
-        //   if (currentKey !== undefined) {
-        //     setId(currentKey);
-        //     setModalOpen(true);
-        //   }
-        // }}
         color="default"
         selectionMode="single"
         bottomContent={
@@ -274,7 +286,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
                     .toLowerCase()}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-4">
+                  <div className="flex gap-2">
                     <FiEdit3
                       size={20}
                       className="hover:opacity-50 cursor-pointer"
@@ -284,8 +296,8 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
                         )
                       }
                     />
-                    <FaCheck
-                      size={16}
+                    <TfiCheckBox
+                      size={20}
                       className="hover:opacity-50 cursor-pointer"
                       onClick={() => {
                         setId(item.id);

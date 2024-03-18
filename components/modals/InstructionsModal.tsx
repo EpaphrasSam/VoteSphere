@@ -11,7 +11,7 @@ import {
 } from "@nextui-org/react";
 import React, { useEffect } from "react";
 
-const InstructionsModal = () => {
+const InstructionsModal = ({ title }: { title: string }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const InstructionsModal = () => {
           <p>Welcome to the KSB voting system!</p>
           <p>
             In this voting system, you will be able to cast your votes for
-            various positions within KSB Welfare.
+            various positions within {title.replace(/Election/, "").trim()}.
           </p>
           <p>
             Please review the candidates carefully before making your choices.
