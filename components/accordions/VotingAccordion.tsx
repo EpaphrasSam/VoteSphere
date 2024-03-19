@@ -6,33 +6,21 @@ import Image from "next/image";
 import { Checkbox } from "@nextui-org/react";
 import VotingSummaryModal from "../modals/VotingSummaryModal";
 import toast, { Toaster } from "react-hot-toast";
-import { generateVoteReport, takeVote } from "@/utils/actions/votes.action";
+import { takeVote } from "@/utils/actions/votes.action";
 import Profile from "@/public/profile.png";
-import { PiMicrosoftExcelLogo } from "react-icons/pi";
-import { utils, writeFile } from "xlsx";
-
-type Candidate = {
-  name: string;
-  image: string;
-};
-
-type Position = {
-  name: string;
-  candidates: Candidate[];
-};
-
-type VotingPeriodData = {
-  name: string;
-  startTime: Date;
-  endTime: Date;
-  positions: Position[];
-};
+import { Candidate, Position, VotingData } from "@/types/votingType";
 
 interface VotingAccordionProps {
-  votingPeriods: VotingPeriodData[];
+  votingPeriods: VotingData;
+  id: string;
+  disabled: boolean;
 }
 
-const VotingAccordion = ({ votingPeriods, id, disabled, username }: any) => {
+const VotingAccordion = ({
+  votingPeriods,
+  id,
+  disabled,
+}: VotingAccordionProps) => {
   const [selectedCandidates, setSelectedCandidates] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -108,7 +96,7 @@ const VotingAccordion = ({ votingPeriods, id, disabled, username }: any) => {
     }
   };
 
-  if (!votingPeriods || votingPeriods.length === 0 || votingPeriods.message) {
+  if (!votingPeriods || Object.keys(votingPeriods).length === 0) {
     return (
       <div className="flex text-center pt-10 justify-center items-center text-3xl font-bold">
         No voting periods available

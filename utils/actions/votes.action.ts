@@ -27,7 +27,7 @@ export async function getVotingPeriods() {
     });
 
     if (!firstVotingPeriod) {
-      return [];
+      return { message: "Voting period not found" };
     }
 
     const formattedVotingPeriod = {

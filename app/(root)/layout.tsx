@@ -28,7 +28,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user }: any = await getServerSession(authOptions);
+  const { user } = (await getServerSession(authOptions)) as {
+    user: {
+      name: "string";
+      email?: "string";
+      image?: "string";
+      id: "string";
+      role: "string";
+      username: "string";
+    };
+  };
   return (
     <AuthProvider>
       <html lang="en">

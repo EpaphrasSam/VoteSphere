@@ -1,7 +1,10 @@
 import VotingDataForm from "@/components/forms/VotingDataForm";
+import { VotingData } from "@/types/votingType";
 import { getVotingPeriodsById } from "@/utils/actions/admin.action";
 import React from "react";
 import { Toaster } from "react-hot-toast";
+
+type VotingPeriodsResult = VotingData | {} | { message: string };
 
 export default async function VotingPeriods({
   searchParams,
@@ -9,16 +12,18 @@ export default async function VotingPeriods({
   searchParams: { votingPeriodId: string };
 }) {
   const votingPeriodId = searchParams.votingPeriodId;
-  let votingPeriods;
-  if (votingPeriodId) {
-    votingPeriods = await getVotingPeriodsById(votingPeriodId);
-  } else {
-    votingPeriods = {};
-  }
+  let votingPeriods: VotingPeriodsResult = {};
   let message = "";
 
-  if ("message" in votingPeriods) {
-    message = votingPeriods.message;
+  if (votingPeriodId) {
+    const result = await getVotingPeriodsById(votingPeriodId);
+    if ("message" in result) {
+      message = result.message;
+    } else {
+      votingPeriods = result;
+    }
+  } else {
+    votingPeriods = {};
   }
 
   return (
