@@ -17,6 +17,7 @@ import { TiTickOutline } from "react-icons/ti";
 import { HiRefresh } from "react-icons/hi";
 import { createVotingPeriod } from "@/utils/actions/admin.action";
 import CustomConfirmationModal from "../modals/CustomConfirmationModal";
+import { UploadButton, UploadDropzone } from "@/utils/uploadthing";
 
 interface VotingDataFormProps {
   votingData: VotingData | {};
@@ -339,7 +340,7 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
   return (
     <div>
       <Toaster position="top-center" />
-      <div className="text-center text-3xl font-bold">Voting Details</div>
+      <div className="text-center text-3xl font-bold">Election Details</div>
       <div className="flex justify-end py-4">
         <HiRefresh
           size={20}
@@ -465,19 +466,33 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
                               )
                             }
                           />
-                          <Input
-                            variant="underlined"
-                            label="Picture url"
-                            placeholder="Enter Candidate picture url"
-                            labelPlacement="outside"
-                            value={candidate.image || ""}
-                            onChange={(e) =>
+                          <UploadDropzone
+                            endpoint="imageUploader"
+                            onClientUploadComplete={(res) => {
                               handleCandidateImageChange(
                                 positionIndex,
                                 candidateIndex,
-                                e.target.value
-                              )
-                            }
+                                res[0].url
+                              );
+                            }}
+                            onUploadError={(error: Error) => {
+                              toast.error(error.message);
+                            }}
+                            content={{
+                              uploadIcon({ ready }) {
+                                return ready && candidate.image !== "" ? (
+                                  <Image
+                                    src={candidate.image || Profile}
+                                    alt={candidate.name}
+                                    width={100}
+                                    height={100}
+                                    className="rounded-full"
+                                  />
+                                ) : (
+                                  "Loading..."
+                                );
+                              },
+                            }}
                           />
                           <div className="flex gap-2 items-center">
                             <TiTickOutline

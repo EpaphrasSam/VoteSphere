@@ -3,18 +3,11 @@ import { Inter } from "next/font/google";
 import { Providers } from "@/app/providers";
 import AuthProvider from "@/hooks/AuthProvider";
 import "../globals.css";
+import "@uploadthing/react/styles.css";
 import Header from "@/components/shared/Header";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/utils/auth";
-
-type UserProps = {
-  name: string;
-  email?: string;
-  image?: string;
-  id: string;
-  role: string;
-  username: string;
-};
+import { User } from "@/types/userType";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,14 +22,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { user } = (await getServerSession(authOptions)) as {
-    user: {
-      name: "string";
-      email?: "string";
-      image?: "string";
-      id: "string";
-      role: "string";
-      username: "string";
-    };
+    user: User;
   };
   return (
     <AuthProvider>

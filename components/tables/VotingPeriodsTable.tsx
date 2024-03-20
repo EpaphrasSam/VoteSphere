@@ -210,7 +210,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
           color="primary"
           onClick={() => navigate.push("/admin/voting-periods")}
         >
-          Create New Vote
+          Create New Election
         </Button>
         <Button
           isLoading={isDownloading}

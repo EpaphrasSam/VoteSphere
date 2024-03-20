@@ -1,5 +1,6 @@
 import VotingAccordion from "@/components/accordions/VotingAccordion";
 import InstructionsModal from "@/components/modals/InstructionsModal";
+import { User } from "@/types/userType";
 import {
   getVotedPeriodByUser,
   getVotingPeriods,
@@ -12,14 +13,7 @@ import { IoIosWarning } from "react-icons/io";
 export default async function Home() {
   let votingPeriods = await getVotingPeriods();
   const { user } = (await getServerSession(authOptions)) as {
-    user: {
-      name: "string";
-      email?: "string";
-      image?: "string";
-      id: "string";
-      role: "string";
-      username: "string";
-    };
+    user: User;
   };
 
   let message = "";
