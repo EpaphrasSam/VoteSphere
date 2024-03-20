@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 export async function getAllVotingPeriods() {
   try {
-    const allVotingPeriods = prisma.votingPeriod.findMany();
+    const allVotingPeriods = (await prisma.votingPeriod.findMany()).reverse();
     return allVotingPeriods;
   } catch (error) {
     return {

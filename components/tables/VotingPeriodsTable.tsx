@@ -11,8 +11,10 @@ import {
   TableCell,
   Pagination,
   Button,
-  Tooltip,
-  Selection,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@nextui-org/react";
 import { PiMicrosoftExcelLogo } from "react-icons/pi";
 import { generateVoteReport } from "@/utils/actions/votes.action";
@@ -70,10 +72,10 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
     return votingPeriods?.slice(start, end);
   }, [page, votingPeriods]);
 
-  const generateVoteReports = async () => {
+  const generateVoteReports = async (id: string) => {
     try {
       setIsDownloading(true);
-      const response: any = await generateVoteReport(selectedVotingPeriodId);
+      const response: any = await generateVoteReport(id);
 
       if (!response.message) {
         const workbook = utils.book_new();
@@ -212,17 +214,45 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
         >
           Create New Election
         </Button>
-        <Button
+        {/* <Button
           isLoading={isDownloading}
           startContent={
             <PiMicrosoftExcelLogo size={20} className="max-[400px]:hidden" />
           }
           color="success"
-          onClick={generateVoteReports}
+          onClick={()=>generateVoteReports(selectedVotingPeriodId)}
         >
           Generate Report
-        </Button>
+        </Button> */}
+        <Dropdown>
+          <DropdownTrigger>
+            <Button
+              isLoading={isDownloading}
+              startContent={
+                <PiMicrosoftExcelLogo
+                  size={20}
+                  className="max-[400px]:hidden"
+                />
+              }
+              color="success"
+              variant="solid"
+            >
+              Generate Report
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Dynamic Actions" items={votingPeriods}>
+            {(item) => (
+              <DropdownItem
+                key={item.id}
+                onClick={() => generateVoteReports(item.id)}
+              >
+                {item.name}
+              </DropdownItem>
+            )}
+          </DropdownMenu>
+        </Dropdown>
       </div>
+
       <Table
         aria-label="Voting Period Table"
         selectedKeys={[selectedVotingPeriodId]}
