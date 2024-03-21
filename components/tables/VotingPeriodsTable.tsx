@@ -240,7 +240,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
               Generate Report
             </Button>
           </DropdownTrigger>
-          <DropdownMenu aria-label="Dynamic Actions" items={votingPeriods}>
+          <DropdownMenu aria-label="Dynamic Actions" items={items}>
             {(item) => (
               <DropdownItem
                 key={item.id}
