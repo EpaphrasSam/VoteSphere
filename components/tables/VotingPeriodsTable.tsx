@@ -214,16 +214,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
         >
           Create New Election
         </Button>
-        {/* <Button
-          isLoading={isDownloading}
-          startContent={
-            <PiMicrosoftExcelLogo size={20} className="max-[400px]:hidden" />
-          }
-          color="success"
-          onClick={()=>generateVoteReports(selectedVotingPeriodId)}
-        >
-          Generate Report
-        </Button> */}
+
         <Dropdown>
           <DropdownTrigger>
             <Button
@@ -256,7 +247,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
       <Table
         aria-label="Voting Period Table"
         selectedKeys={[selectedVotingPeriodId]}
-        color="default"
+        color="primary"
         selectionMode="single"
         bottomContent={
           pages > 1 && (
