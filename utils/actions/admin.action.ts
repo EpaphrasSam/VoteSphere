@@ -106,13 +106,13 @@ export async function createVotingPeriod(
       },
       update: {
         name: votingPeriodData.name,
-        startDate: votingPeriodData.startTime,
-        endDate: votingPeriodData.endTime,
+        startDate: votingPeriodData.startDate,
+        endDate: votingPeriodData.endDate,
       },
       create: {
         name: votingPeriodData.name,
-        startDate: votingPeriodData.startTime,
-        endDate: votingPeriodData.endTime,
+        startDate: votingPeriodData.startDate,
+        endDate: votingPeriodData.endDate,
       },
     });
 
