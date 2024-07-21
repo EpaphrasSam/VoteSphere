@@ -7,8 +7,8 @@ import {
   ModalFooter,
   Button,
   ModalBody,
+  Avatar,
 } from "@nextui-org/react";
-import Image from "next/image";
 import React from "react";
 import Profile from "@/public/profile.png";
 
@@ -70,7 +70,7 @@ const VotingSummaryModal = ({
                   {typeof selectedCandidates[positionIndex] === "number" && (
                     <>
                       <div className="flex flex-col items-center">
-                        <Image
+                        <Avatar
                           src={
                             pos.candidates[selectedCandidates[positionIndex]]
                               .image || Profile
@@ -79,9 +79,8 @@ const VotingSummaryModal = ({
                             pos.candidates[selectedCandidates[positionIndex]]
                               .name
                           }
-                          width={100}
-                          height={100}
-                          className="rounded-full"
+                          size="lg"
+                          className="w-52 h-52"
                         />
                         <span>
                           {
@@ -97,14 +96,15 @@ const VotingSummaryModal = ({
                       selectedCandidates[positionIndex] === "no") && (
                       <>
                         <div className="flex flex-col items-center">
-                          <Image
+                          <Avatar
                             src={pos.candidates[0].image}
                             alt={pos.candidates[0].name}
-                            width={100}
-                            height={100}
-                            className="rounded-full"
+                            size="lg"
+                            className="w-52 h-52"
                           />
-                          <span>{pos.candidates[0].name}</span>
+                          <span className="text-xl font-medium">
+                            {pos.candidates[0].name}
+                          </span>
                           <span>
                             {" "}
                             - {selectedCandidates[positionIndex].toUpperCase()}

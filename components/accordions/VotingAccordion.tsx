@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Accordion, AccordionItem, Button, Divider } from "@nextui-org/react";
+import {
+  Accordion,
+  AccordionItem,
+  Avatar,
+  Button,
+  Divider,
+} from "@nextui-org/react";
 import Image from "next/image";
 import { Checkbox } from "@nextui-org/react";
 import VotingSummaryModal from "../modals/VotingSummaryModal";
@@ -162,12 +168,11 @@ const VotingAccordion = ({
                         key={candidateIndex}
                         className={`flex flex-col items-center justify-center p-2 `}
                       >
-                        <Image
-                          src={candidate.image || Profile}
+                        <Avatar
+                          src={candidate.image || ""}
                           alt={candidate.name}
-                          width={150}
-                          height={150}
-                          className="rounded-full"
+                          className="w-52 h-52"
+                          size="lg"
                         />
                         <div className="py-2 text-center">{candidate.name}</div>
                         {position.candidates.length === 1 ? (

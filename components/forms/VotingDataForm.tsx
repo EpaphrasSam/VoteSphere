@@ -1,7 +1,7 @@
 "use client";
 
 import { Candidate, Position, VotingData } from "@/types/votingType";
-import { Button, Card, Input } from "@nextui-org/react";
+import { Button, Card, Input, Avatar } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -10,14 +10,12 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import moment from "moment";
-import Image from "next/image";
-import Profile from "@/public/profile.png";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { TiTickOutline } from "react-icons/ti";
 import { HiRefresh } from "react-icons/hi";
 import { createVotingPeriod } from "@/utils/actions/admin.action";
 import CustomConfirmationModal from "../modals/CustomConfirmationModal";
-import { UploadButton, UploadDropzone } from "@/utils/uploadthing";
+import { UploadDropzone } from "@/utils/uploadthing";
 
 interface VotingDataFormProps {
   votingData: VotingData | {};
@@ -62,7 +60,7 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
     });
 
     setPositions((votingData as VotingData)?.positions || []);
-  }, [votingData]);
+  }, []); // Empty dependency array ensures this runs only once
 
   const handlePositionChange = (index: number, name: string) => {
     const newPositions = [...positions];
@@ -274,6 +272,7 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
         deletedCandidateIds
       );
       if (response.message === "Voting period created/updated successfully") {
+        navigate.replace("/admin");
         toast.success(response.message);
         isDisabled();
       } else {
@@ -481,18 +480,21 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
                             content={{
                               uploadIcon({ ready }) {
                                 return ready && candidate.image !== "" ? (
-                                  <Image
-                                    src={candidate.image || Profile}
+                                  <Avatar
+                                    src={candidate.image || ""}
                                     alt={candidate.name}
-                                    width={100}
-                                    height={100}
-                                    className="rounded-full"
+                                    size="lg"
+                                    className="w-24 h-24"
                                   />
                                 ) : (
                                   "Loading..."
                                 );
                               },
                             }}
+                            // appearance={{
+                            //   button:
+                            //     "ut-ready:bg-green-500 ut-uploading:cursor-not-allowed rounded-r-none bg-blue-700 bg-none after:bg-orange-400",
+                            // }}
                           />
                           <div className="flex gap-2 items-center">
                             <TiTickOutline
@@ -518,14 +520,13 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
                         </div>
                       ) : (
                         <div className="flex flex-col items-center">
-                          <Image
-                            src={candidate.image || Profile}
+                          <Avatar
+                            src={candidate.image || ""}
                             alt={candidate.name}
-                            width={150}
-                            height={150}
-                            className="rounded-full"
+                            size="lg"
+                            className="w-52 h-52"
                           />
-                          <div className="py-2 text-center">
+                          <div className="py-2 text-xl font-medium text-center">
                             {candidate.name}
                           </div>
                           <div className="mt-2 flex gap-2 items-start">
