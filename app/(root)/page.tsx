@@ -27,9 +27,9 @@ export default async function Home() {
     const currentDate = new Date();
 
     const isTimeToVote = () => {
-      if ("startTime" in votingPeriods) {
-        const startDate = new Date(votingPeriods.startTime);
-        const endDate = new Date(votingPeriods.endTime);
+      if ("startDate" in votingPeriods) {
+        const startDate = new Date(votingPeriods.startDate);
+        const endDate = new Date(votingPeriods.endDate);
 
         if (currentDate < startDate) return "Not time to vote yet";
         if (currentDate > endDate) return "Voting time has passed";

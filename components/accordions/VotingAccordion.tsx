@@ -112,31 +112,27 @@ const VotingAccordion = ({
       </div>
       <div className="flex justify-between pb-6">
         <div className="flex flex-col">
-          <span className="text-xs text-gray-500">Date</span>{" "}
+          <span className="text-xs text-gray-500">Start Date & Time</span>{" "}
           <span className="font-semibold text-xl max-sm:text-lg">
-            {new Intl.DateTimeFormat("en-US", {
-              weekday: "short",
+            {new Date(votingPeriods.startDate).toLocaleString([], {
               year: "numeric",
               month: "short",
               day: "numeric",
-            }).format(new Date(votingPeriods.startTime))}
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-gray-500">Time</span>{" "}
+          <span className="text-xs text-gray-500">End Date & Time</span>{" "}
           <span className="font-semibold text-xl max-sm:text-lg">
-            {new Date(votingPeriods.startTime)
-              .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-              .replace(/ /g, "")
-              .toLowerCase()}
-            {" - "}
-            {new Date(votingPeriods.endTime)
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-              .replace(/ /g, "")
-              .toLowerCase()}
+            {new Date(votingPeriods.endDate).toLocaleString([], {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
         </div>
       </div>
