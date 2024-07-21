@@ -40,13 +40,13 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
   const [formData, setFormData] = useState<{
     id?: string;
     name: string;
-    startTime: Date;
-    endTime: Date;
+    startDate: Date;
+    endDate: Date;
   }>({
     id: (votingData as VotingData)?.id || undefined,
     name: (votingData as VotingData)?.name || "",
-    startTime: new Date((votingData as VotingData)?.startTime || new Date()),
-    endTime: new Date((votingData as VotingData)?.endTime || new Date()),
+    startDate: new Date((votingData as VotingData)?.startDate || new Date()),
+    endDate: new Date((votingData as VotingData)?.endDate || new Date()),
   });
 
   const [positions, setPositions] = useState<Position[]>(
@@ -57,8 +57,8 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
     setFormData({
       id: (votingData as VotingData)?.id || undefined,
       name: (votingData as VotingData)?.name || "",
-      startTime: new Date((votingData as VotingData)?.startTime || new Date()),
-      endTime: new Date((votingData as VotingData)?.endTime || new Date()),
+      startDate: new Date((votingData as VotingData)?.startDate || new Date()),
+      endDate: new Date((votingData as VotingData)?.endDate || new Date()),
     });
 
     setPositions((votingData as VotingData)?.positions || []);
@@ -364,9 +364,9 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
             <DemoContainer components={["DateTimePicker"]}>
               <DateTimePicker
                 label="Start Date"
-                value={moment(formData.startTime) || null}
+                value={moment(formData.startDate) || null}
                 onChange={(e: any) =>
-                  setFormData({ ...formData, startTime: new Date(e) })
+                  setFormData({ ...formData, startDate: new Date(e) })
                 }
               />
             </DemoContainer>
@@ -375,9 +375,9 @@ const VotingDataForm = ({ votingData, message }: VotingDataFormProps) => {
             <DemoContainer components={["DateTimePicker"]}>
               <DateTimePicker
                 label="End Date"
-                value={moment(formData.endTime) || null}
+                value={moment(formData.endDate) || null}
                 onChange={(e: any) =>
-                  setFormData({ ...formData, endTime: new Date(e) })
+                  setFormData({ ...formData, endDate: new Date(e) })
                 }
               />
             </DemoContainer>
