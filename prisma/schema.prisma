@@ -10,8 +10,8 @@ datasource db {
 
 model User {
   id          String      @id @default(cuid()) @map("_id")
-  name        String
-  username    String
+  name        String      
+  username    String      @unique
   password    String
   role        String? 
   deleted     Boolean @default(false)

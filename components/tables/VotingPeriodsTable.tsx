@@ -277,9 +277,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
         </TableHeader>
 
         {isEmpty ? (
-          <TableBody emptyContent={"No schedule for this exams."}>
-            {[]}
-          </TableBody>
+          <TableBody emptyContent={"No voting periods found."}>{[]}</TableBody>
         ) : (
           <TableBody items={items} aria-colspan={3}>
             {(item: any) => (
