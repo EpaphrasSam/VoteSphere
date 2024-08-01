@@ -238,7 +238,7 @@ const VotingAccordion = ({
           color={!isDisabled() || disabled ? "default" : "primary"}
           onClick={() => setIsOpen(true)}
         >
-          Next
+          Submit
         </Button>
       </div>
 

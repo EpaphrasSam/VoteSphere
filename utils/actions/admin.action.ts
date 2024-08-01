@@ -64,6 +64,53 @@ export async function getVotingPeriodsById(id: string) {
   }
 }
 
+export async function getVotingDataByPeriodId(id: string) {
+  try {
+    const votingPeriod = await prisma.votingPeriod.findFirst({
+      where: { id, deleted: false },
+      include: {
+        positions: {
+          include: {
+            candidates: true,
+          },
+        },
+        votes: true,
+      },
+    });
+
+    if (!votingPeriod) {
+      return { message: "Voting period not found" };
+    }
+
+    const data = {
+      id: votingPeriod.id,
+      name: votingPeriod.name,
+      positions: votingPeriod.positions.map((position) => ({
+        id: position.id,
+        name: position.name,
+        candidates: position.candidates.map((candidate) => {
+          const votes = votingPeriod.votes.filter(
+            (vote) => vote.candidateId === candidate.id
+          );
+          return {
+            id: candidate.id,
+            name: candidate.name,
+            votes: votes.length,
+            ...(votes.some((vote) => vote.isYes !== null) && {
+              yes: votes.filter((vote) => vote.isYes === "yes").length,
+              no: votes.filter((vote) => vote.isYes === "no").length,
+            }),
+          };
+        }),
+      })),
+    };
+
+    return data;
+  } catch (error) {
+    return { message: "Error fetching voting data" };
+  }
+}
+
 export async function createVotingPeriod(
   votingPeriodData: VotingData,
   positionsIds: string[],
