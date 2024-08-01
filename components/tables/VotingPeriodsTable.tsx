@@ -265,9 +265,8 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
       >
         <TableHeader>
           <TableColumn key="name">Name</TableColumn>
-          <TableColumn key="date">Date</TableColumn>
-          <TableColumn key="start_time">Start Time</TableColumn>
-          <TableColumn key="end_time">End Time</TableColumn>
+          <TableColumn key="start_date">Start Date</TableColumn>
+          <TableColumn key="end_date">End Date</TableColumn>
           <TableColumn key="action">Action</TableColumn>
         </TableHeader>
 
@@ -288,17 +287,15 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
                   })}
                 </TableCell>
                 <TableCell>
-                  {new Date(item.startDate).toLocaleTimeString([], {
+                  {new Date(item.endDate).toLocaleString([], {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </TableCell>
-                <TableCell>
-                  {new Date(item.endDate).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </TableCell>
+
                 <TableCell>
                   <div className="flex gap-2">
                     <FiEdit3
