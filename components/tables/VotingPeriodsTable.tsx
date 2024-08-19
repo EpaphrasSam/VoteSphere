@@ -81,34 +81,29 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
         const workbook = utils.book_new();
         const worksheet = utils.aoa_to_sheet([]);
 
-        const date = new Intl.DateTimeFormat("en-US", {
-          weekday: "short",
+        const startDate = new Date(response.startDate).toLocaleString([], {
           year: "numeric",
           month: "short",
           day: "numeric",
-        }).format(new Date(response.startTime));
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-        const startTime = new Date(response.startTime)
-          .toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-          .replace(/ /g, "")
-          .toLowerCase();
-
-        const endTime = new Date(response.endTime)
-          .toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-          .replace(/ /g, "")
-          .toLowerCase();
+        const endDate = new Date(response.endDate).toLocaleString([], {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
         worksheet["B1"] = {
           v: "VOTING REPORT",
         };
         worksheet["B2"] = { v: response.name };
-        worksheet["B3"] = { v: date + ", " + startTime + " - " + endTime };
+        worksheet["B3"] = {
+          v: `Start Date & Time: ${startDate}, End Date & Time: ${endDate}`,
+        };
 
         const tableColumns = ["Position", "Name", "Votes", "Percentage"];
         const excelRows = [tableColumns];
@@ -270,42 +265,37 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
       >
         <TableHeader>
           <TableColumn key="name">Name</TableColumn>
-          <TableColumn key="date">Date</TableColumn>
-          <TableColumn key="start_time">Start Time</TableColumn>
-          <TableColumn key="end_time">End Time</TableColumn>
+          <TableColumn key="start_date">Start Date</TableColumn>
+          <TableColumn key="end_date">End Date</TableColumn>
           <TableColumn key="action">Action</TableColumn>
         </TableHeader>
 
         {isEmpty ? (
-          <TableBody emptyContent={"No schedule for this exams."}>
-            {[]}
-          </TableBody>
+          <TableBody emptyContent={"No voting periods found."}>{[]}</TableBody>
         ) : (
           <TableBody items={items} aria-colspan={3}>
             {(item: any) => (
               <TableRow key={item.id}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>
-                  {new Date(item.startDate).toLocaleDateString()}
+                  {new Date(item.startDate).toLocaleString([], {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </TableCell>
                 <TableCell>
-                  {new Date(item.startDate)
-                    .toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                    .replace(/ /g, "")
-                    .toLowerCase()}
+                  {new Date(item.endDate).toLocaleString([], {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </TableCell>
-                <TableCell>
-                  {new Date(item.endDate)
-                    .toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                    .replace(/ /g, "")
-                    .toLowerCase()}
-                </TableCell>
+
                 <TableCell>
                   <div className="flex gap-2">
                     <FiEdit3

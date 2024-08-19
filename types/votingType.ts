@@ -15,7 +15,7 @@ export interface Position {
 export type VotingData = {
   id?: string;
   name: string;
-  startTime: Date;
-  endTime: Date;
+  startDate: Date;
+  endDate: Date;
   positions: Position[];
 };

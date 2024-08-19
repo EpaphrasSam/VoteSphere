@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Accordion, AccordionItem, Button, Divider } from "@nextui-org/react";
+import {
+  Accordion,
+  AccordionItem,
+  Avatar,
+  Button,
+  Divider,
+} from "@nextui-org/react";
 import Image from "next/image";
 import { Checkbox } from "@nextui-org/react";
 import VotingSummaryModal from "../modals/VotingSummaryModal";
@@ -112,31 +118,27 @@ const VotingAccordion = ({
       </div>
       <div className="flex justify-between pb-6">
         <div className="flex flex-col">
-          <span className="text-xs text-gray-500">Date</span>{" "}
+          <span className="text-xs text-gray-500">Start Date & Time</span>{" "}
           <span className="font-semibold text-xl max-sm:text-lg">
-            {new Intl.DateTimeFormat("en-US", {
-              weekday: "short",
+            {new Date(votingPeriods.startDate).toLocaleString([], {
               year: "numeric",
               month: "short",
               day: "numeric",
-            }).format(new Date(votingPeriods.startTime))}
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-gray-500">Time</span>{" "}
+          <span className="text-xs text-gray-500">End Date & Time</span>{" "}
           <span className="font-semibold text-xl max-sm:text-lg">
-            {new Date(votingPeriods.startTime)
-              .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-              .replace(/ /g, "")
-              .toLowerCase()}
-            {" - "}
-            {new Date(votingPeriods.endTime)
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-              .replace(/ /g, "")
-              .toLowerCase()}
+            {new Date(votingPeriods.endDate).toLocaleString([], {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
         </div>
       </div>
@@ -166,12 +168,11 @@ const VotingAccordion = ({
                         key={candidateIndex}
                         className={`flex flex-col items-center justify-center p-2 `}
                       >
-                        <Image
-                          src={candidate.image || Profile}
+                        <Avatar
+                          src={candidate.image || ""}
                           alt={candidate.name}
-                          width={150}
-                          height={150}
-                          className="rounded-full"
+                          className="w-52 h-52"
+                          size="lg"
                         />
                         <div className="py-2 text-center">{candidate.name}</div>
                         {position.candidates.length === 1 ? (
@@ -237,7 +238,7 @@ const VotingAccordion = ({
           color={!isDisabled() || disabled ? "default" : "primary"}
           onClick={() => setIsOpen(true)}
         >
-          Next
+          Submit
         </Button>
       </div>
 

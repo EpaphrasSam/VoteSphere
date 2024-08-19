@@ -33,8 +33,8 @@ export async function getVotingPeriods() {
     const formattedVotingPeriod = {
       id: firstVotingPeriod.id,
       name: firstVotingPeriod.name,
-      startTime: firstVotingPeriod.startDate,
-      endTime: firstVotingPeriod.endDate,
+      startDate: firstVotingPeriod.startDate,
+      endDate: firstVotingPeriod.endDate,
       positions: firstVotingPeriod.positions.map((position) => ({
         id: position.id,
         name: position.name,
@@ -135,8 +135,8 @@ export async function generateVoteReport(votingPeriodId: string) {
     const voteReport = {
       id: votingPeriod.id,
       name: votingPeriod.name,
-      startTime: votingPeriod.startDate,
-      endTime: votingPeriod.endDate,
+      startDate: votingPeriod.startDate,
+      endDate: votingPeriod.endDate,
       positions: votingPeriod.positions.map((position) => {
         return {
           id: position.id,
