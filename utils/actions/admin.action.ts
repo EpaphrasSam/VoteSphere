@@ -71,7 +71,11 @@ export async function getVotingDataByPeriodId(id: string) {
       include: {
         positions: {
           include: {
-            candidates: true,
+            candidates: {
+              where: {
+                deleted: false,
+              },
+            },
           },
         },
         votes: true,

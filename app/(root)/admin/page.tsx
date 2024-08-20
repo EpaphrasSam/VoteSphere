@@ -8,6 +8,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/utils/auth";
 import { User } from "@prisma/client";
 
+export const revalidate = 'force-dynamic'
+
 export default async function Admin() {
   const { user } = (await getServerSession(authOptions)) as {
     user: User;

@@ -41,6 +41,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({
+      username,
+      password,
       message: [
         `Hello ${name}`,
         `Your username is ${username} and password is ${password}`,
@@ -115,13 +117,13 @@ function generateRandomPassword() {
 }
 
 async function generateUniqueUsername(name: string, votingPeriodId: string) {
-  const names = name.split(" ");
+  const names = name.replace(/-/g, " ").split(" ");
   const initials = names
     .slice(0, -1)
     .map((n: string) => n[0])
     .join("")
     .toLowerCase();
-  const lastName = names[names.length - 1].toLowerCase();
+  const lastName = names[names.length - 1].toLowerCase().replace(/-/g, "");
   let username = initials + lastName;
   let suffix = 1;
 
