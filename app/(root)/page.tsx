@@ -10,7 +10,7 @@ import { Chip } from "@nextui-org/react";
 import { getServerSession } from "next-auth";
 import { IoIosWarning } from "react-icons/io";
 
-export const revalidate = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const { user } = (await getServerSession(authOptions)) as {

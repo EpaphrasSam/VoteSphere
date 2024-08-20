@@ -4,7 +4,7 @@ import { getVotingPeriodsById } from "@/utils/actions/admin.action";
 import React from "react";
 import { Toaster } from "react-hot-toast";
 
-export const revalidate = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 type VotingPeriodsResult = VotingData | {} | { message: string };
 
