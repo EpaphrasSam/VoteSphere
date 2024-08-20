@@ -49,7 +49,7 @@ export default async function Home() {
 
     return (
       <>
-        <InstructionsModal title={votingPeriods.name} />
+        <InstructionsModal title={votingPeriods.name} name={user.name} />
         {hasUserVoted ? (
           <div className="flex flex-row items-center justify-center py-4">
             <Chip color="danger" startContent={<IoIosWarning />}>
