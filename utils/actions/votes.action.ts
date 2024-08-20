@@ -3,7 +3,7 @@
 import prisma from "@/utils/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function getVotingPeriods() {
+export async function getVotingPeriods(userId: string) {
   try {
     const firstVotingPeriod = await prisma.votingPeriod.findFirst({
       where: {
@@ -35,6 +35,8 @@ export async function getVotingPeriods() {
       name: firstVotingPeriod.name,
       startDate: firstVotingPeriod.startDate,
       endDate: firstVotingPeriod.endDate,
+      current: firstVotingPeriod.current,
+      deleted: firstVotingPeriod.deleted,
       positions: firstVotingPeriod.positions.map((position) => ({
         id: position.id,
         name: position.name,

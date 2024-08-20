@@ -11,10 +11,11 @@ import { getServerSession } from "next-auth";
 import { IoIosWarning } from "react-icons/io";
 
 export default async function Home() {
-  let votingPeriods = await getVotingPeriods();
   const { user } = (await getServerSession(authOptions)) as {
     user: User;
   };
+
+  let votingPeriods = await getVotingPeriods(user.id);
 
   let message = "";
 

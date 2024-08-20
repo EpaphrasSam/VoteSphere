@@ -228,6 +228,40 @@ export async function selectVotingPeriod(id: string) {
   }
 }
 
+export async function associateUsersWithVotingPeriod(
+  votingPeriodId: string,
+  usernames?: string[]
+) {
+  try {
+    let updateQuery: any = {
+      where: {
+        OR: [{ votingPeriodId: null }, { votingPeriodId: { isSet: false } }],
+        adminLevel: 0, // Only update regular users
+      },
+      data: {
+        votingPeriodId,
+      },
+    };
+
+    // If usernames are provided, update only those users
+    if (usernames && usernames.length > 0) {
+      updateQuery.where.username = { in: usernames };
+    }
+
+    const result = await prisma.user.updateMany(updateQuery);
+
+    revalidatePath("/admin"); // Revalidate the admin page to reflect changes
+
+    return {
+      message: "Users associated with voting period successfully",
+      updatedCount: result.count,
+    };
+  } catch (error) {
+    console.error("Error associating users with voting period:", error);
+    return { message: "Error while associating users with voting period" };
+  }
+}
+
 // export async function unDeleteRecords() {
 //   try {
 //     await prisma.votingPeriod.updateMany({

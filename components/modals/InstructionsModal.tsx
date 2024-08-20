@@ -49,7 +49,7 @@ const InstructionsModal = ({ title }: { title: string }) => {
           Instructions
         </ModalHeader>
         <ModalBody>
-          <p>Welcome to VoteSphere!</p>
+          <p>Welcome to KSB Voting System!</p>
           <p>
             In this voting system, you will be able to cast your votes for
             various positions within {title.replace(/Election/, "").trim()}.

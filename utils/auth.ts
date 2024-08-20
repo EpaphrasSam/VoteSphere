@@ -19,6 +19,9 @@ export const authOptions: any = {
           where: {
             username: credentials.username,
           },
+          include: {
+            votingPeriod: true,
+          },
         });
 
         if (
@@ -26,6 +29,20 @@ export const authOptions: any = {
           !(await bcrypt.compare(credentials.password, user.password))
         ) {
           throw new Error("Invalid username or password");
+        }
+
+        // Check if the user is associated with the current voting period or is an admin
+        const currentVotingPeriod = await prisma.votingPeriod.findFirst({
+          where: { current: true },
+        });
+
+        if (
+          user.adminLevel === 0 &&
+          user.votingPeriodId !== currentVotingPeriod?.id
+        ) {
+          throw new Error(
+            "You are not authorized to access this voting period"
+          );
         }
 
         return user;
@@ -38,6 +55,8 @@ export const authOptions: any = {
         token.user_id = user.id;
         token.role = user.role;
         token.username = user.username;
+        token.adminLevel = user.adminLevel;
+        token.votingPeriodId = user.votingPeriodId;
       }
       return Promise.resolve(token);
     },
@@ -46,6 +65,8 @@ export const authOptions: any = {
         session.user.id = token.user_id;
         session.user.role = token.role;
         session.user.username = token.username;
+        session.user.adminLevel = token.adminLevel;
+        session.user.votingPeriodId = token.votingPeriodId;
       }
       return Promise.resolve(session);
     },

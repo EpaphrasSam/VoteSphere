@@ -36,9 +36,14 @@ type votingPeriods = {
 interface VotingPeriodsProp {
   votingPeriods: votingPeriods[];
   message: string;
+  showSelectButton: boolean;
 }
 
-const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
+const VotingPeriodsTable = ({
+  votingPeriods,
+  message,
+  showSelectButton,
+}: VotingPeriodsProp) => {
   const rowsPerPage = 10;
   const [page, setPage] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -137,7 +142,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
               candidate.name,
               typeof candidate.votes !== "undefined"
                 ? candidate.votes
-                : `YES- ${candidate.yes || 0}   NO- ${candidate.no || 0}`,
+                : `YES- ${candidate.yes || 0}   NO- ${candidate.no || 0}`,
               `${totalPercentage.toFixed(2)}%`,
             ];
             excelRows.push(row);
@@ -196,6 +201,22 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
         setIsSubmitting(false);
         setModalOpen(false);
       }
+    }
+  };
+
+  const handleSelectVotingPeriod = async (id: string) => {
+    try {
+      setIsSubmitting(true);
+      const response = await selectVotingPeriod(id);
+      if (response.message === "Voting period selected successfully") {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error("Error while selecting voting period");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

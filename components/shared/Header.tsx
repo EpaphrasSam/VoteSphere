@@ -14,12 +14,13 @@ const Header = ({ role }: any) => {
       <div className="flex items-center gap-2 max-w-full">
         <Link href="/">
           <Image
-            src="/logo.png"
+            src="/ksb.jpg"
             alt="Logo"
             width={40}
             height={40}
             className="rounded-full"
           />
+          <p className="font-bold text-inherit ml-1">Voting System</p>
         </Link>
       </div>
 
