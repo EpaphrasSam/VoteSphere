@@ -8,13 +8,12 @@ import {
   Button,
   Divider,
 } from "@nextui-org/react";
-import Image from "next/image";
 import { Checkbox } from "@nextui-org/react";
 import VotingSummaryModal from "../modals/VotingSummaryModal";
 import toast, { Toaster } from "react-hot-toast";
 import { takeVote } from "@/utils/actions/votes.action";
-import Profile from "@/public/profile.png";
 import { Candidate, Position, VotingData } from "@/types/votingType";
+import { FaThumbsUp, FaThumbsDown } from "react-icons/fa"; // Import icons
 
 interface VotingAccordionProps {
   votingPeriods: VotingData;
@@ -27,23 +26,20 @@ const VotingAccordion = ({
   id,
   disabled,
 }: VotingAccordionProps) => {
-  const [selectedCandidates, setSelectedCandidates] = useState({});
+  const [selectedCandidates, setSelectedCandidates] = useState<
+    Record<number, number | string>
+  >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleCheckboxChange = (positionIndex: any, candidateIndex: any) => {
-    setSelectedCandidates((prevState: any) => {
-      if (prevState[positionIndex] === candidateIndex) {
-        const updatedState = { ...prevState };
-        delete updatedState[positionIndex];
-        return updatedState;
-      }
-
-      return {
-        ...prevState,
-        [positionIndex]: candidateIndex,
-      };
-    });
+  const handleCheckboxChange = (
+    positionIndex: number,
+    candidateIndex: number | string
+  ) => {
+    setSelectedCandidates((prevState) => ({
+      ...prevState,
+      [positionIndex]: candidateIndex,
+    }));
   };
 
   const isDisabled = () => {
@@ -102,6 +98,13 @@ const VotingAccordion = ({
     }
   };
 
+  const handleImageClick = (positionIndex: number, candidateIndex: number) => {
+    if (votingPeriods.positions[positionIndex].candidates.length === 1) {
+      return; // Do nothing for single candidates
+    }
+    handleCheckboxChange(positionIndex, candidateIndex);
+  };
+
   if (!votingPeriods || Object.keys(votingPeriods).length === 0) {
     return (
       <div className="flex text-center pt-10 justify-center items-center text-3xl font-bold">
@@ -111,7 +114,7 @@ const VotingAccordion = ({
   }
 
   return (
-    <div className="p-6">
+    <div className="sm:p-6 p-2">
       <Toaster position="top-center" />
       <div className="font-bold uppercase text-3xl text-center py-4">
         {votingPeriods.name}
@@ -171,55 +174,75 @@ const VotingAccordion = ({
                         <Avatar
                           src={candidate.image || ""}
                           alt={candidate.name}
-                          className="w-52 h-52"
+                          className="w-52 h-52 cursor-pointer"
                           size="lg"
+                          onClick={() =>
+                            handleImageClick(positionIndex, candidateIndex)
+                          }
+                          color={
+                            position.candidates.length === 1
+                              ? selectedCandidates[positionIndex] === "yes"
+                                ? "success"
+                                : selectedCandidates[positionIndex] === "no"
+                                ? "danger"
+                                : "default"
+                              : selectedCandidates[positionIndex] ===
+                                candidateIndex
+                              ? "success"
+                              : "default"
+                          }
+                          classNames={{
+                            base: `${
+                              position.candidates.length === 1
+                                ? selectedCandidates[positionIndex] === "yes"
+                                  ? "border-5 border-success"
+                                  : selectedCandidates[positionIndex] === "no"
+                                  ? "border-5 border-danger"
+                                  : ""
+                                : selectedCandidates[positionIndex] ===
+                                  candidateIndex
+                                ? "border-5 border-success"
+                                : ""
+                            }`,
+                          }}
                         />
                         <div className="py-2 text-center">{candidate.name}</div>
                         {position.candidates.length === 1 ? (
                           <div className="flex gap-4">
-                            <Checkbox
-                              color="success"
-                              isSelected={
-                                selectedCandidates[
-                                  positionIndex as keyof typeof selectedCandidates
-                                ] === "yes"
+                            <Button
+                              isIconOnly
+                              color={
+                                selectedCandidates[positionIndex] === "yes"
+                                  ? "success"
+                                  : "default"
                               }
-                              onChange={() =>
+                              variant="light"
+                              size="lg"
+                              aria-label="Yes"
+                              onClick={() =>
                                 handleCheckboxChange(positionIndex, "yes")
                               }
                             >
-                              Yes
-                            </Checkbox>
-                            <Checkbox
-                              color="danger"
-                              isSelected={
-                                selectedCandidates[
-                                  positionIndex as keyof typeof selectedCandidates
-                                ] === "no"
+                              <FaThumbsUp size={24} />
+                            </Button>
+                            <Button
+                              isIconOnly
+                              color={
+                                selectedCandidates[positionIndex] === "no"
+                                  ? "danger"
+                                  : "default"
                               }
-                              onChange={() =>
+                              variant="light"
+                              size="lg"
+                              aria-label="No"
+                              onClick={() =>
                                 handleCheckboxChange(positionIndex, "no")
                               }
                             >
-                              No
-                            </Checkbox>
+                              <FaThumbsDown size={24} />
+                            </Button>
                           </div>
-                        ) : (
-                          <Checkbox
-                            color="success"
-                            isSelected={
-                              selectedCandidates[
-                                positionIndex as keyof typeof selectedCandidates
-                              ] === candidateIndex
-                            }
-                            onChange={() =>
-                              handleCheckboxChange(
-                                positionIndex,
-                                candidateIndex
-                              )
-                            }
-                          />
-                        )}
+                        ) : null}
                       </div>
                     )
                   )}
