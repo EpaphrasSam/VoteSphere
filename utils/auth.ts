@@ -15,30 +15,40 @@ export const authOptions: any = {
       },
       authorize: async (credentials) => {
         if (credentials == null) return null;
+
+        // Find the current voting period
+        const currentVotingPeriod = await prisma.votingPeriod.findFirst({
+          where: { current: true },
+        });
+
+        if (!currentVotingPeriod) {
+          throw new Error("No active voting period found");
+        }
+
+        // Find the user with the matching username and current voting period
         const user = await prisma.user.findFirst({
           where: {
             username: credentials.username,
+            votingPeriodId: currentVotingPeriod.id,
           },
           include: {
             votingPeriod: true,
           },
         });
 
-        if (
-          !user ||
-          !(await bcrypt.compare(credentials.password, user.password))
-        ) {
+        if (!user) {
+          throw new Error("You don't qualify for the current voting period");
+        }
+
+        // Check password
+        if (!(await bcrypt.compare(credentials.password, user.password))) {
           throw new Error("Invalid username or password");
         }
 
-        // Check if the user is associated with the current voting period or is an admin
-        const currentVotingPeriod = await prisma.votingPeriod.findFirst({
-          where: { current: true },
-        });
-
+        // Admin check (if needed)
         if (
           user.adminLevel === 0 &&
-          user.votingPeriodId !== currentVotingPeriod?.id
+          user.votingPeriodId !== currentVotingPeriod.id
         ) {
           throw new Error(
             "You are not authorized to access this voting period"
