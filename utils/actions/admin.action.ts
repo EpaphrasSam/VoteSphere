@@ -266,6 +266,45 @@ export async function associateUsersWithVotingPeriod(
   }
 }
 
+export async function getVotingStatistics(votingPeriodId: string) {
+  try {
+    const votingPeriod = await prisma.votingPeriod.findUnique({
+      where: { id: votingPeriodId },
+      include: {
+        userVoted: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            user: {
+              name: "asc",
+            },
+          },
+        },
+      },
+    });
+
+    if (!votingPeriod) {
+      return { message: "Voting period not found" };
+    }
+
+    const totalVotes = votingPeriod.userVoted.length;
+    const votedUsers = votingPeriod.userVoted.map(
+      (userVoted) => userVoted.user
+    );
+
+    return { totalVotes, votedUsers };
+  } catch (error) {
+    console.error("Error fetching voting statistics:", error);
+    return { message: "Error fetching voting statistics" };
+  }
+}
+
 // export async function unDeleteRecords() {
 //   try {
 //     await prisma.votingPeriod.updateMany({

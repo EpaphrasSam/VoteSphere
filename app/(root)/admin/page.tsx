@@ -1,6 +1,10 @@
 import VotingPeriodsTable from "@/components/tables/VotingPeriodsTable";
-import VotingChart from "@/components/charts/VotingChart"; // Import the new chart component
-import { getAllVotingPeriods } from "@/utils/actions/admin.action";
+import VotingChart from "@/components/charts/VotingChart";
+import VotedUsersDrawer from "@/components/drawers/VotedUsersDrawer";
+import {
+  getAllVotingPeriods,
+  getVotingStatistics,
+} from "@/utils/actions/admin.action";
 import { Divider } from "@nextui-org/react";
 import React from "react";
 import { Toaster } from "react-hot-toast";
@@ -27,7 +31,6 @@ export default async function Admin() {
     message = allVotingPeriods.message;
     allVotingPeriods = [];
   } else {
-    // If the user is a voting period admin, filter the voting periods
     if (user.adminLevel === 1) {
       allVotingPeriods = allVotingPeriods.filter(
         (period) => period.id === user.votingPeriodId
@@ -36,11 +39,13 @@ export default async function Admin() {
   }
 
   let selectedVotingPeriod = null;
+  let votingStatistics = null;
 
   if (Array.isArray(allVotingPeriods)) {
     const currentPeriod = allVotingPeriods.find((period) => period.current);
     if (currentPeriod) {
       selectedVotingPeriod = { id: currentPeriod.id, name: currentPeriod.name };
+      votingStatistics = await getVotingStatistics(currentPeriod.id);
     }
   }
 
@@ -60,6 +65,14 @@ export default async function Admin() {
           <div className="text-2xl mb-4 text-center font-bold text-gray-600">
             {selectedVotingPeriod.name}
           </div>
+          {votingStatistics && !("message" in votingStatistics) && (
+            <div className="mb-4 flex items-center justify-center">
+              <p className="text-gray-500 text-base font-bold">
+                Total Voters: {votingStatistics.totalVotes}
+              </p>
+              <VotedUsersDrawer votedUsers={votingStatistics.votedUsers} />
+            </div>
+          )}
           <VotingChart votingPeriodId={selectedVotingPeriod.id} />
         </div>
       )}
