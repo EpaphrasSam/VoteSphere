@@ -37,6 +37,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
+      username: user.username,
+      password: newPassword,
       message: [
         `Hello ${user.name}`,
         `Your username is ${user.username} and your new password is ${newPassword}`,

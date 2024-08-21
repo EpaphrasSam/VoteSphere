@@ -60,8 +60,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const request = await req.json();
-    const { votingPeriodId } = request;
+    const votingPeriodId = url.searchParams.get("votingPeriodId");
     const num = parseInt(url.searchParams.get("number") || "1", 10);
 
     if (!votingPeriodId) {
@@ -76,11 +75,7 @@ export async function GET(req: Request) {
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
       const name = `${firstName} ${lastName}`;
-      const initials = firstName[0].toLowerCase();
-      const username = await generateUniqueUsername(
-        initials,
-        lastName.toLowerCase()
-      );
+      const username = await generateUniqueUsername(name, votingPeriodId);
       const password = generateRandomPassword();
       const hashedPassword = await bcrypt.hash(password, 10);
 

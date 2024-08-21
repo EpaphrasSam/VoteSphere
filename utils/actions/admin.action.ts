@@ -305,28 +305,25 @@ export async function getVotingStatistics(votingPeriodId: string) {
   }
 }
 
-// export async function unDeleteRecords() {
-//   try {
-//     await prisma.votingPeriod.updateMany({
-//       data: {
-//         deleted: false,
-//       },
-//     });
+export async function getUsernamesByVotingPeriod(votingPeriodId: string) {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { votingPeriodId: votingPeriodId },
+          { adminLevel: 2 },
+          { votingPeriodId: null },
+          { AND: [{ adminLevel: 1 }, { votingPeriodId: votingPeriodId }] },
+        ],
+      },
+      select: {
+        username: true,
+      },
+    });
 
-//     await prisma.position.updateMany({
-//       data: {
-//         deleted: false,
-//       },
-//     });
-
-//     await prisma.candidate.updateMany({
-//       data: {
-//         deleted: false,
-//       },
-//     });
-
-//     return { message: "Records undeleted successfully" };
-//   } catch (error) {
-//     return { message: "Error while undeleting records" };
-//   }
-// }
+    return users.map((user) => user.username);
+  } catch (error) {
+    console.error("Error fetching usernames:", error);
+    return [];
+  }
+}

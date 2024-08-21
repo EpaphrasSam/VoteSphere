@@ -37,7 +37,7 @@ import { FaUserPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { selectVotingPeriod } from "@/utils/actions/admin.action";
 import CustomConfirmationModal from "../modals/CustomConfirmationModal";
-import { useDropzone } from "react-dropzone";
+import CredentialGenerationModal from "../modals/CredentialGenerationModal";
 
 type votingPeriods = {
   id: string;
@@ -62,38 +62,11 @@ const VotingPeriodsTable = ({
   const [page, setPage] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGeneratingCredentials, setIsGeneratingCredentials] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const toastId = useRef<string | null>(null);
   const navigate = useRouter();
   const [isCredentialModalOpen, setIsCredentialModalOpen] = useState(false);
-  const [randomCredentialCount, setRandomCredentialCount] = useState(1);
-  const [credentialMode, setCredentialMode] = useState<
-    "upload" | "generate" | null
-  >(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      const fileExtension = file.name.split(".").pop()?.toLowerCase();
-      if (fileExtension === "xlsx") {
-        setUploadedFile(file);
-        // toast.success("XLSX file uploaded successfully");
-      } else {
-        toast.error("Please upload a valid XLSX file");
-        setUploadedFile(null);
-      }
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "text/xlsx": [".xlsx"],
-    },
-  });
 
   useEffect(() => {
     if (message !== "" && !toastId.current) {
@@ -262,100 +235,6 @@ const VotingPeriodsTable = ({
     }
   };
 
-  const handleGenerateRandomCredentials = async () => {
-    try {
-      setIsGeneratingCredentials(true);
-      const response = await fetch(
-        `/api/generateCredentials?number=${randomCredentialCount}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ votingPeriodId: selectedVotingPeriodId }),
-        }
-      );
-      const credentials = await response.json();
-      if (credentials.error) {
-        toast.error(credentials.error);
-      } else {
-        downloadCredentialsAsExcel(credentials, "Random_Credentials.xlsx");
-        toast.success(
-          "Random credentials generated and downloaded successfully"
-        );
-      }
-    } catch (error) {
-      toast.error("Error generating random credentials");
-    } finally {
-      setIsGeneratingCredentials(false);
-    }
-  };
-
-  const handleCSVUpload = async () => {
-    if (!uploadedFile) return;
-    try {
-      setIsGeneratingCredentials(true);
-      const workbook = read(await uploadedFile.arrayBuffer(), {
-        type: "buffer",
-      });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const jsonData = utils.sheet_to_json(sheet);
-
-      if (jsonData.length === 0) {
-        toast.error("No data found in the uploaded XLSX file");
-        return;
-      }
-
-      const allHaveName = jsonData.every((row: any) =>
-        row.hasOwnProperty("Name")
-      );
-      if (!allHaveName) {
-        toast.error(
-          "All rows in the uploaded XLSX file must have a 'Name' field"
-        );
-        return;
-      }
-
-      const credentials = await Promise.all(
-        jsonData.map(async (row: any) => {
-          const response = await fetch("/api/generateCredentials", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: row.Name,
-              votingPeriodId: selectedVotingPeriodId,
-            }),
-          });
-          return response.json();
-        })
-      );
-
-      const updatedWorkbook = utils.book_new();
-      const updatedSheet = utils.json_to_sheet([
-        ...jsonData.map((row: any, index: number) => ({
-          ...row,
-          Username: credentials[index].username,
-          Password: credentials[index].password,
-        })),
-      ]);
-      utils.book_append_sheet(updatedWorkbook, updatedSheet, "Credentials");
-      writeFile(updatedWorkbook, "Updated_Credentials.xlsx");
-      toast.success("Credentials generated and appended to XLSX successfully");
-    } catch (error) {
-      console.error(error);
-      toast.error("Error generating credentials from XLSX");
-    } finally {
-      setIsGeneratingCredentials(false);
-      setModalOpen(false);
-    }
-  };
-
-  const downloadCredentialsAsExcel = (credentials: any[], filename: string) => {
-    const workbook = utils.book_new();
-    const worksheet = utils.json_to_sheet(credentials);
-    utils.book_append_sheet(workbook, worksheet, "Credentials");
-    writeFile(workbook, filename);
-  };
-
   return (
     <>
       <div className="flex justify-between mb-6">
@@ -497,86 +376,11 @@ const VotingPeriodsTable = ({
           isSubmitting={isSubmitting}
         />
       )}
-      <Modal
+      <CredentialGenerationModal
         isOpen={isCredentialModalOpen}
-        onClose={() => {
-          setIsCredentialModalOpen(false);
-          setCredentialMode(null);
-          setUploadedFile(null);
-        }}
-      >
-        <ModalContent>
-          <ModalHeader>Generate Credentials</ModalHeader>
-          <ModalBody className="p-6">
-            <div className="flex justify-evenly mb-4">
-              <Button
-                onClick={() => setCredentialMode("upload")}
-                color={credentialMode === "upload" ? "primary" : "default"}
-              >
-                Upload XLSX
-              </Button>
-              <Button
-                onClick={() => setCredentialMode("generate")}
-                color={credentialMode === "generate" ? "primary" : "default"}
-              >
-                Generate Random
-              </Button>
-            </div>
-            {credentialMode === "upload" && (
-              <div
-                {...getRootProps()}
-                className="border-2 border-dashed p-4 text-center"
-              >
-                <input {...getInputProps()} />
-
-                {uploadedFile ? (
-                  <p className="font-bold text-blue-500">
-                    {" "}
-                    {uploadedFile.name}
-                  </p>
-                ) : isDragActive ? (
-                  <p>Drop the XLSX file here ...</p>
-                ) : (
-                  <p>Drag & drop a XLSX file here, or click to select a file</p>
-                )}
-              </div>
-            )}
-            {credentialMode === "generate" && (
-              <Input
-                type="number"
-                label="Number of random credentials"
-                value={randomCredentialCount.toString()}
-                onChange={(e) =>
-                  setRandomCredentialCount(parseInt(e.target.value, 10))
-                }
-              />
-            )}
-            {credentialMode && (
-              <Button
-                onClick={
-                  credentialMode === "upload"
-                    ? handleCSVUpload
-                    : handleGenerateRandomCredentials
-                }
-                disabled={
-                  credentialMode === "upload"
-                    ? !uploadedFile
-                    : randomCredentialCount <= 0
-                }
-                color={
-                  (credentialMode === "upload" && uploadedFile) ||
-                  (credentialMode === "generate" && randomCredentialCount > 0)
-                    ? "primary"
-                    : "default"
-                }
-                isLoading={isGeneratingCredentials}
-              >
-                Submit
-              </Button>
-            )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+        onClose={() => setIsCredentialModalOpen(false)}
+        selectedVotingPeriodId={selectedVotingPeriodId}
+      />
     </>
   );
 };
