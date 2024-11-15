@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import toast from "react-hot-toast";
 import {
   Table,
@@ -15,15 +21,23 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Modal,
+  Input,
+  ModalHeader,
+  ModalBody,
+  ModalContent,
+  Tooltip,
 } from "@nextui-org/react";
 import { PiMicrosoftExcelLogo } from "react-icons/pi";
 import { generateVoteReport } from "@/utils/actions/votes.action";
-import { utils, writeFile } from "xlsx";
+import { utils, writeFile, read } from "xlsx";
 import { FiEdit3, FiPlus } from "react-icons/fi";
+import { TfiCheckBox } from "react-icons/tfi";
+import { FaUserPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { selectVotingPeriod } from "@/utils/actions/admin.action";
 import CustomConfirmationModal from "../modals/CustomConfirmationModal";
-import { TfiCheckBox } from "react-icons/tfi";
+import CredentialGenerationModal from "../modals/CredentialGenerationModal";
 
 type votingPeriods = {
   id: string;
@@ -36,9 +50,14 @@ type votingPeriods = {
 interface VotingPeriodsProp {
   votingPeriods: votingPeriods[];
   message: string;
+  showSelectButton: boolean;
 }
 
-const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
+const VotingPeriodsTable = ({
+  votingPeriods,
+  message,
+  showSelectButton,
+}: VotingPeriodsProp) => {
   const rowsPerPage = 10;
   const [page, setPage] = useState(1);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -47,6 +66,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
   const [id, setId] = useState<string | null>(null);
   const toastId = useRef<string | null>(null);
   const navigate = useRouter();
+  const [isCredentialModalOpen, setIsCredentialModalOpen] = useState(false);
 
   useEffect(() => {
     if (message !== "" && !toastId.current) {
@@ -137,7 +157,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
               candidate.name,
               typeof candidate.votes !== "undefined"
                 ? candidate.votes
-                : `YES- ${candidate.yes || 0}   NO- ${candidate.no || 0}`,
+                : `YES- ${candidate.yes || 0}   NO- ${candidate.no || 0}`,
               `${totalPercentage.toFixed(2)}%`,
             ];
             excelRows.push(row);
@@ -199,6 +219,22 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
     }
   };
 
+  const handleSelectVotingPeriod = async (id: string) => {
+    try {
+      setIsSubmitting(true);
+      const response = await selectVotingPeriod(id);
+      if (response.message === "Voting period selected successfully") {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      toast.error("Error while selecting voting period");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <div className="flex justify-between mb-6">
@@ -241,7 +277,7 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
 
       <Table
         aria-label="Voting Period Table"
-        selectedKeys={[selectedVotingPeriodId]}
+        selectedKeys={[selectedVotingPeriodId!]}
         color="primary"
         selectionMode="single"
         bottomContent={
@@ -317,6 +353,13 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
                         }
                       }}
                     />
+                    <FaUserPlus
+                      size={20}
+                      className="hover:opacity-50 cursor-pointer"
+                      onClick={() => {
+                        setIsCredentialModalOpen(true);
+                      }}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
@@ -333,6 +376,11 @@ const VotingPeriodsTable = ({ votingPeriods, message }: VotingPeriodsProp) => {
           isSubmitting={isSubmitting}
         />
       )}
+      <CredentialGenerationModal
+        isOpen={isCredentialModalOpen}
+        onClose={() => setIsCredentialModalOpen(false)}
+        selectedVotingPeriodId={selectedVotingPeriodId}
+      />
     </>
   );
 };

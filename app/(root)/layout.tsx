@@ -12,8 +12,8 @@ import { User } from "@/types/userType";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VoteSphere",
-  description: "A versatile voting system for various purposes",
+  title: "KSB Voting App",
+  description: "A voting system for the KSB",
 };
 
 export default async function RootLayout({

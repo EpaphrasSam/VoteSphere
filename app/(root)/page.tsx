@@ -10,11 +10,14 @@ import { Chip } from "@nextui-org/react";
 import { getServerSession } from "next-auth";
 import { IoIosWarning } from "react-icons/io";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-  let votingPeriods = await getVotingPeriods();
   const { user } = (await getServerSession(authOptions)) as {
     user: User;
   };
+
+  let votingPeriods = await getVotingPeriods(user.id);
 
   let message = "";
 
@@ -46,7 +49,7 @@ export default async function Home() {
 
     return (
       <>
-        <InstructionsModal title={votingPeriods.name} />
+        <InstructionsModal title={votingPeriods.name} name={user.name} />
         {hasUserVoted ? (
           <div className="flex flex-row items-center justify-center py-4">
             <Chip color="danger" startContent={<IoIosWarning />}>

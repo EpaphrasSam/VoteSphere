@@ -5,91 +5,54 @@ import { faker } from "@faker-js/faker";
 
 export async function POST(req: Request) {
   try {
-    const request = await req.json();
-    const { name, username: providedUsername } = request;
+    const { name, votingPeriodId } = await req.json();
 
-    if (!name) {
+    if (!name || !votingPeriodId) {
       return NextResponse.json({
-        error: "Name is required",
-      });
-    }
-
-    if (providedUsername) {
-      const existingUser = await prisma.user.findUnique({
-        where: { username: providedUsername },
-      });
-
-      if (!existingUser) {
-        return NextResponse.json({
-          error: "Username does not exist",
-        });
-      }
-
-      if (existingUser.name !== name) {
-        return NextResponse.json({
-          error: "Username does not match the provided name",
-        });
-      }
-
-      const password = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      await prisma.user.update({
-        where: { username: providedUsername },
-        data: { password: hashedPassword },
-      });
-
-      return NextResponse.json({
-        message: `Your new password is ${password}`,
+        error: "Name and voting period ID are required",
       });
     }
 
     const existingUser = await prisma.user.findFirst({
-      where: { name },
+      where: { name, votingPeriodId },
     });
 
-    if (existingUser) {
-      return NextResponse.json({
-        error: "Name already exists",
-      });
-    }
-
-    const names = name.split(" ");
-    const initials = names
-      .slice(0, -1)
-      .map((n: any) => n[0])
-      .join("")
-      .toLowerCase();
-    const lastName = names[names.length - 1].toLowerCase();
-    let newUsername = initials + lastName;
-
-    let suffix = 1;
-    while (await prisma.user.findUnique({ where: { username: newUsername } })) {
-      newUsername = initials + lastName + suffix;
-      suffix++;
-    }
-
+    let username = await generateUniqueUsername(name, votingPeriodId);
     const password = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
-      data: {
-        name,
-        username: newUsername,
-        password: hashedPassword,
-      },
-    });
+    if (existingUser) {
+      // Update existing user
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { password: hashedPassword },
+      });
+    } else {
+      // Create new user
+      await prisma.user.create({
+        data: {
+          name,
+          username,
+          password: hashedPassword,
+          votingPeriodId,
+          adminLevel: 0,
+        },
+      });
+    }
 
     return NextResponse.json({
+      username,
+      password,
       message: [
         `Hello ${name}`,
-        `Your username is ${newUsername} and password is ${password}`,
-        `Use the credentials to login to the voting system to vote.`,
+        `Your username is ${username} and password is ${password}`,
+        `Use these credentials to login to the voting system for this voting period.`,
       ],
     });
   } catch (error) {
+    console.error("Error creating/updating credentials:", error);
     return NextResponse.json({
-      error: "Error creating credentials",
+      error: "Error creating/updating credentials",
     });
   }
 }
@@ -97,7 +60,14 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
+    const votingPeriodId = url.searchParams.get("votingPeriodId");
     const num = parseInt(url.searchParams.get("number") || "1", 10);
+
+    if (!votingPeriodId) {
+      return NextResponse.json({
+        error: "Voting period ID is required",
+      });
+    }
 
     const credentials = [];
 
@@ -105,11 +75,7 @@ export async function GET(req: Request) {
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
       const name = `${firstName} ${lastName}`;
-      const initials = firstName[0].toLowerCase();
-      const username = await generateUniqueUsername(
-        initials,
-        lastName.toLowerCase()
-      );
+      const username = await generateUniqueUsername(name, votingPeriodId);
       const password = generateRandomPassword();
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -125,6 +91,7 @@ export async function GET(req: Request) {
             name,
             username,
             password: hashedPassword,
+            votingPeriodId,
           },
         });
       });
@@ -144,11 +111,18 @@ function generateRandomPassword() {
   return Math.random().toString(36).slice(-8);
 }
 
-async function generateUniqueUsername(initials: string, lastName: string) {
+async function generateUniqueUsername(name: string, votingPeriodId: string) {
+  const names = name.replace(/-/g, " ").split(" ");
+  const initials = names
+    .slice(0, -1)
+    .map((n: string) => n[0])
+    .join("")
+    .toLowerCase();
+  const lastName = names[names.length - 1].toLowerCase().replace(/-/g, "");
   let username = initials + lastName;
   let suffix = 1;
 
-  while (await prisma.user.findUnique({ where: { username } })) {
+  while (await prisma.user.findFirst({ where: { username, votingPeriodId } })) {
     username = initials + lastName + suffix;
     suffix++;
   }

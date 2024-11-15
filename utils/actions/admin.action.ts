@@ -71,7 +71,11 @@ export async function getVotingDataByPeriodId(id: string) {
       include: {
         positions: {
           include: {
-            candidates: true,
+            candidates: {
+              where: {
+                deleted: false,
+              },
+            },
           },
         },
         votes: true,
@@ -228,28 +232,98 @@ export async function selectVotingPeriod(id: string) {
   }
 }
 
-// export async function unDeleteRecords() {
-//   try {
-//     await prisma.votingPeriod.updateMany({
-//       data: {
-//         deleted: false,
-//       },
-//     });
+export async function associateUsersWithVotingPeriod(
+  votingPeriodId: string,
+  usernames?: string[]
+) {
+  try {
+    let updateQuery: any = {
+      where: {
+        OR: [{ votingPeriodId: null }, { votingPeriodId: { isSet: false } }],
+        adminLevel: 0, // Only update regular users
+      },
+      data: {
+        votingPeriodId,
+      },
+    };
 
-//     await prisma.position.updateMany({
-//       data: {
-//         deleted: false,
-//       },
-//     });
+    // If usernames are provided, update only those users
+    if (usernames && usernames.length > 0) {
+      updateQuery.where.username = { in: usernames };
+    }
 
-//     await prisma.candidate.updateMany({
-//       data: {
-//         deleted: false,
-//       },
-//     });
+    const result = await prisma.user.updateMany(updateQuery);
 
-//     return { message: "Records undeleted successfully" };
-//   } catch (error) {
-//     return { message: "Error while undeleting records" };
-//   }
-// }
+    revalidatePath("/admin"); // Revalidate the admin page to reflect changes
+
+    return {
+      message: "Users associated with voting period successfully",
+      updatedCount: result.count,
+    };
+  } catch (error) {
+    console.error("Error associating users with voting period:", error);
+    return { message: "Error while associating users with voting period" };
+  }
+}
+
+export async function getVotingStatistics(votingPeriodId: string) {
+  try {
+    const votingPeriod = await prisma.votingPeriod.findUnique({
+      where: { id: votingPeriodId },
+      include: {
+        userVoted: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            user: {
+              name: "asc",
+            },
+          },
+        },
+      },
+    });
+
+    if (!votingPeriod) {
+      return { message: "Voting period not found" };
+    }
+
+    const totalVotes = votingPeriod.userVoted.length;
+    const votedUsers = votingPeriod.userVoted.map(
+      (userVoted) => userVoted.user
+    );
+
+    return { totalVotes, votedUsers };
+  } catch (error) {
+    console.error("Error fetching voting statistics:", error);
+    return { message: "Error fetching voting statistics" };
+  }
+}
+
+export async function getUsernamesByVotingPeriod(votingPeriodId: string) {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { votingPeriodId: votingPeriodId },
+          { adminLevel: 2 },
+          { votingPeriodId: null },
+          { AND: [{ adminLevel: 1 }, { votingPeriodId: votingPeriodId }] },
+        ],
+      },
+      select: {
+        username: true,
+      },
+    });
+
+    return users.map((user) => user.username);
+  } catch (error) {
+    console.error("Error fetching usernames:", error);
+    return [];
+  }
+}
